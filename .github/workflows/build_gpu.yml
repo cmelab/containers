@@ -2,12 +2,12 @@ name: build_gpuhoomdconda
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
     # Run when container is changed
     paths:
         - 'containers/dockerfile_gpuhoomdconda'
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
     paths:
         - 'containers/dockerfile_gpuhoomdconda'
 
