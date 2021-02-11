@@ -71,3 +71,4 @@ RUN git clone --recursive https://github.com/glotzerlab/hoomd-blue.git && \
               -DSINGLE_PRECISION=ON && \
     make && \
     make install
+
