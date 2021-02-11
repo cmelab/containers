@@ -18,6 +18,7 @@ ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 
 ENV PATH /opt/conda/bin:$PATH
 
+# By default running container starts bash shell
 CMD [ "/bin/bash" ]
 
 ENV CONDA_VERSION=py38_4.9.2
@@ -44,7 +45,7 @@ SHELL ["/bin/bash", "--login", "-c"]
 
 # Prevent python from loading packages from outside the container
 # default empty pythonpath
-ENV PYTHONPATH /ignore/pythonpath
+ENV PYTHONPATH=/ignore/pythonpath
 
 # Install HOOMD
 ENV HOOMD_TAG=v2.9.4
@@ -70,4 +71,3 @@ RUN git clone --recursive https://github.com/glotzerlab/hoomd-blue.git && \
               -DSINGLE_PRECISION=ON && \
     make && \
     make install
-#test
