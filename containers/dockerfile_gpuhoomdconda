@@ -58,9 +58,9 @@ RUN git clone --recursive https://github.com/glotzerlab/hoomd-blue.git && \
     cd build && \
     cmake ../ -DENABLE_MPI=OFF \
               -DENABLE_CUDA=ON \
-              -DPYTHON_EXECUTABLE=$(command -v python) \
-              -DCMAKE_C_COMPILER=$(command -v gcc) \
-              -DCMAKE_CXX_COMPILER=$(command -v g++) \
+              -DPYTHON_EXECUTABLE=$(which python) \
+              -DCMAKE_C_COMPILER=$(which gcc) \
+              -DCMAKE_CXX_COMPILER=$(which g++) \
               -DCMAKE_INSTALL_PREFIX=$(python -c "import site; print(site.getsitepackages()[0])") \
               -DBUILD_HPMC=OFF \
               -DBUILD_JIT=OFF \ 
