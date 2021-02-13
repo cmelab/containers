@@ -58,10 +58,10 @@ RUN git clone --recursive https://github.com/glotzerlab/hoomd-blue.git && \
     cd build && \
     cmake ../ -DENABLE_MPI=OFF \
               -DENABLE_CUDA=ON \
-              -DPYTHON_EXECUTABLE=$(which python) \
+              -DPYTHON_EXECUTABLE=/opt/conda/bin/python \
               -DCMAKE_C_COMPILER=$(which gcc) \
               -DCMAKE_CXX_COMPILER=$(which g++) \
-              -DCMAKE_INSTALL_PREFIX=$(python -c "import site; print(site.getsitepackages()[0])") \
+              -DCMAKE_INSTALL_PREFIX=/opt/conda/lib/python3.7/site-packages \
               -DBUILD_HPMC=OFF \
               -DBUILD_JIT=OFF \ 
               -DBUILD_METAL=OFF \ 
