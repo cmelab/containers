@@ -48,7 +48,7 @@ SHELL ["/bin/bash", "--login", "-c"]
 ENV PYTHONPATH=/ignore/pythonpath
 
 # Install HOOMD deps
-RUN conda install -c conda-forge numpy
+RUN conda install -c conda-forge numpy && \
     python --version
 
 # Install HOOMD
