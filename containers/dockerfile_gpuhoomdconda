@@ -14,7 +14,7 @@ RUN apt-get update && \
     && apt-get clean
 
 # Install nvidia-container-cli
-ENV DIST=$(. /etc/os-release; echo $ID$VERSION_ID)
+ENV DIST=ubuntu18.04
 
 RUN curl -s -L https://nvidia.github.io/libnvidia-container/gpgkey | apt-key add - && \
     curl -s -L https://nvidia.github.io/libnvidia-container/$DIST/libnvidia-container.list | \
