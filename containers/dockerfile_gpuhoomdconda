@@ -13,16 +13,6 @@ RUN apt-get update && \
         libtbb-dev \
     && apt-get clean
 
-# Install nvidia-container-cli
-ENV DIST=ubuntu18.04
-
-RUN curl -s -L https://nvidia.github.io/libnvidia-container/gpgkey | apt-key add - && \
-    curl -s -L https://nvidia.github.io/libnvidia-container/$DIST/libnvidia-container.list | \
-        tee /etc/apt/sources.list.d/libnvidia-container.list && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends nvidia-container-runtime && \
-    apt-get clean
-
 # Install miniconda
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 
