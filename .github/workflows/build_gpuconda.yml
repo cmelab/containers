@@ -12,7 +12,7 @@ on:
         - 'containers/dockerfile_gpuconda'
 
 jobs:
-  build_gpuhoomdconda:
+  build_gpuconda:
     runs-on: ubuntu-latest
 
     steps:
