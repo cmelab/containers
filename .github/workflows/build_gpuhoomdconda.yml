@@ -6,10 +6,6 @@ on:
     # Run when container is changed
     paths:
         - 'containers/dockerfile_gpuhoomdconda'
-  pull_request:
-    branches: [ main ]
-    paths:
-        - 'containers/dockerfile_gpuhoomdconda'
 
 jobs:
   build_gpuhoomdconda:
