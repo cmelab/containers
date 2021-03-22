@@ -45,4 +45,5 @@ SHELL ["/bin/bash", "--login", "-c"]
 
 # Prevent python from loading packages from outside the container
 # default empty pythonpath
+ENV PYTHONPATH=/ignore/pythonpath
 
