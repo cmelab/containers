@@ -14,7 +14,6 @@ RUN apt-get update && \
         cmake \
         curl \
         git \
-        libcublas-${CUDA/./-} \
         libcudnn8=${CUDNN}+cuda${CUDA} \
         libfreetype6-dev \
         libhdf5-serial-dev \
