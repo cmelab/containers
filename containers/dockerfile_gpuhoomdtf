@@ -66,7 +66,7 @@ RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/lib
     && ldconfig
 
 # Install HOOMD deps and tensorflow
-RUN conda install -c conda-forge numpy pip python=3.7 && \
+RUN conda install -c conda-forge numpy=1.19.5 pip python=3.7 && \
     python --version && \
     python -m pip install --no-cache-dir tensorflow==2.4.1
 
