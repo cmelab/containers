@@ -1,8 +1,12 @@
-FROM tensorflow/tensorflow:2.3.1-custom-op-gpu-ubuntu16
+FROM nvidia/cuda:10.2-devel 
 
 # Install system dependencies
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
+
+# Set cuda versions
+ARG CUDA=10.2
+ARG CUDNN=8.1.0.77-1
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -10,7 +14,12 @@ RUN apt-get update && \
         cmake \
         curl \
         git \
+        libcublas-${CUDA/./-} \
+        libcudnn8=${CUDNN}+cuda${CUDA} \
+        libfreetype6-dev \
+        libhdf5-serial-dev \
         libtbb-dev \
+        libzmq3-dev \
     && apt-get clean
 
 # Install miniconda
@@ -47,17 +56,35 @@ SHELL ["/bin/bash", "--login", "-c"]
 # default empty pythonpath
 ENV PYTHONPATH=/ignore/pythonpath
 
-# Install HOOMD deps
-RUN conda install -c conda-forge numpy python=3.7 && \
-    python --version
+## Tensorflow installation
+# For CUDA profiling, TensorFlow requires CUPTI.
+ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 
-# Install HOOMD
+# Link the libcuda stub to the location where tensorflow is searching for it and reconfigure
+# dynamic linker run-time bindings
+RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 \
+    && echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/z-cuda-stubs.conf \
+    && ldconfig
+
+# Install HOOMD deps and tensorflow
+RUN conda install -c conda-forge numpy pip python=3.7 && \
+    python --version && \
+    python -m pip install --no-cache-dir tensorflow==2.4.1
+
+# Clone HOOMD
 ENV HOOMD_TAG=v2.9.4
 
 RUN git clone --recursive https://github.com/glotzerlab/hoomd-blue.git && \
     cd hoomd-blue && \
     git checkout $HOOMD_TAG && \
-    git submodule update && \
+    git submodule update
+
+# Link HOOMD-TF in HOOMD/hoomd modules
+RUN git clone -b cg_properties_update --single-branch https://github.com/ur-whitelab/hoomd-tf.git && \
+    ln -s /opt/hoomd-tf/htf /opt/hoomd-blue/hoomd
+
+# Install HOOMD
+RUN cd hoomd-blue && \
     mkdir build && \
     cd build && \
     cmake ../ -DENABLE_MPI=OFF \
@@ -73,6 +100,6 @@ RUN git clone --recursive https://github.com/glotzerlab/hoomd-blue.git && \
               -DBUILD_CGCMM=OFF \
               -DBUILD_DEPRECATED=OFF \
               -DBUILD_MPCD=OFF && \
-    make && \
+    make -j && \
     make install
 
