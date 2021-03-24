@@ -4,17 +4,13 @@ FROM nvidia/cuda:10.2-devel
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
 
-# Set cuda versions
-ARG CUDA=10.2
-ARG CUDNN=8.1.0.77-1
-
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         ca-certificates \
         cmake \
         curl \
         git \
-        libcudnn8=${CUDNN}+cuda${CUDA} \
+        libcudnn8=8.1.0.77-1+cuda10.2 \
         libfreetype6-dev \
         libhdf5-serial-dev \
         libtbb-dev \
@@ -65,10 +61,10 @@ RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/lib
     && echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/z-cuda-stubs.conf \
     && ldconfig
 
-# Install HOOMD deps and tensorflow
-RUN conda install -c conda-forge numpy=1.19.5 pip python=3.7 && \
+# Install HOOMD and tensorflow deps
+RUN conda install -c conda-forge numpy=1.19.5 pip=20 python=3.7 wheel && \
     python --version && \
-    python -m pip install --no-cache-dir tensorflow==2.4.1
+    python -m pip install --no-deps keras_preprocessing
 
 # Clone HOOMD
 ENV HOOMD_TAG=v2.9.4
