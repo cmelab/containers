@@ -99,6 +99,6 @@ RUN cd hoomd-blue && \
               -DBUILD_CGCMM=OFF \
               -DBUILD_DEPRECATED=OFF \
               -DBUILD_MPCD=OFF && \
-    make -j && \
+    make && \
     make install
 
