@@ -23,7 +23,9 @@ RUN curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel
     mv bazel.gpg /etc/apt/trusted.gpg.d/ && \
     echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | tee /etc/apt/sources.list.d/bazel.list && \
     apt-get update && \
-    apt-get install -y bazel
+    apt-get install -y bazel-3.7.2 && \
+    apt-get clean && \
+    ln -s /usr/bin/bazel-3.7.2 /usr/bin/bazel
 
 # Install miniconda
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
