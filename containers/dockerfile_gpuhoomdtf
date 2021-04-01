@@ -23,7 +23,7 @@ RUN curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel
     mv bazel.gpg /etc/apt/trusted.gpg.d/ && \
     echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | tee /etc/apt/sources.list.d/bazel.list && \
     apt-get update && \
-    apt-get install bazel
+    apt-get install -y bazel
 
 # Install miniconda
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
@@ -75,7 +75,7 @@ RUN conda install -c conda-forge numpy=1.19.5 pip=20 python=3.7 wheel && \
     python -m pip install --no-deps keras_preprocessing
 
 # Clone Tensorflow
-RUN git clone https://github.com/tensorflow/tensorflow.git -b r2.5 --single-branch && \
+RUN git clone https://github.com/tensorflow/tensorflow.git -b r2.5 --single-branch
 
 # Clone HOOMD
 ENV HOOMD_TAG=v2.9.4
