@@ -6,15 +6,24 @@ ENV TZ=Etc/UTC
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
+        apt-transport-https \
         ca-certificates \
         cmake \
         curl \
         git \
+        gnupg \
         libfreetype6-dev \
         libhdf5-serial-dev \
         libtbb-dev \
         libzmq3-dev \
     && apt-get clean
+
+# Install Bazel
+RUN curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel.gpg && \
+    mv bazel.gpg /etc/apt/trusted.gpg.d/ && \
+    echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list && \
+    apt-get update && \
+    apt-get install bazel
 
 # Install miniconda
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
@@ -65,12 +74,14 @@ RUN conda install -c conda-forge numpy=1.19.5 pip=20 python=3.7 wheel && \
     python --version && \
     python -m pip install --no-deps keras_preprocessing
 
+# Clone Tensorflow
+RUN git clone https://github.com/tensorflow/tensorflow.git -b r2.5 --single-branch && \
+
 # Clone HOOMD
 ENV HOOMD_TAG=v2.9.4
 
-RUN git clone --recursive https://github.com/glotzerlab/hoomd-blue.git && \
+RUN git clone --recursive https://github.com/glotzerlab/hoomd-blue.git -b $HOOMD_TAG --single-branch && \
     cd hoomd-blue && \
-    git checkout $HOOMD_TAG && \
     git submodule update
 
 # Link HOOMD-TF in HOOMD/hoomd modules
