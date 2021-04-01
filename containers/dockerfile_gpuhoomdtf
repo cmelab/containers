@@ -63,7 +63,7 @@ ENV PYTHONPATH=/ignore/pythonpath
 
 ## Tensorflow installation
 # For CUDA profiling, TensorFlow requires CUPTI.
-ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+ENV LD_LIBRARY_PATH /usr/include:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 
 # Link the libcuda stub to the location where tensorflow is searching for it and reconfigure
 # dynamic linker run-time bindings
@@ -78,6 +78,37 @@ RUN conda install -c conda-forge numpy=1.19.5 pip=20 python=3.7 wheel && \
 
 # Clone Tensorflow
 RUN git clone https://github.com/tensorflow/tensorflow.git -b r2.5 --single-branch
+    
+
+# set up specific cuda and cudnn versions and run configure    
+# run configure script with defaults c/o https://github.com/tensorflow/tensorflow/issues/8527
+# due to using CUDA 10.x, NCCL is in a different place than other cuda libs and not automatically found.
+# (see https://forums.developer.nvidia.com/t/cublas-for-10-1-is-missing/71015)
+RUN ln -s /usr/include/cublas_api.h /usr/local/cuda/cublas_api.h && \
+    ln -s /usr/lib/x86_64-linux-gnu/libcublas.so.10.2.2.89 /usr/local/cuda/libcublas.so.10.2.2.89 && \
+    ln -s /usr/lib/x86_64-linux-gnu/libcublasLt.so.10.2.2.89 /usr/local/cuda/libcublasLt.so.10.2.2.89
+
+RUN for a in $(ls /usr/include/x86_64-linux-gnu/cudnn*v8*); \
+    do fname=$(echo $a | sed 's/.*\/cudnn/cudnn/' | sed 's/_v8//'); ln -s $a /usr/include/x86_64-linux-gnu/$fname; done
+
+ENV TF_NEED_CUDA=1 \
+    TF_CUDA_VERSION=10.2 \
+    CUDA_TOOLKIT_PATH=/usr/local/cuda \
+    TF_CUDNN_VERSION=8.1.1 \
+    TF_CUDA_PATHS=/usr/local/cuda \
+    CUDNN_INSTALL_PATH=/usr/lib/x86_64-linux-gnu/ \
+    TF_NCCL_VERSION=2.8.4 \
+    NCCL_INSTALL_PATH=/usr/lib/x86_64-linux-gnu \
+    TF_CUBLAS_VERSION=10.2 \
+    TF_NEED_TENSORRT=0 \
+    TF_NEED_ROCM=0
+#RUN find /usr -name "*cublas*" && ffksdf
+RUN cd tensorflow && \
+    chmod u+x ./configure && \
+    yes '' | ./configure && \
+    bazel build --config=cuda //tensorflow/tools/pip_package:build_pip_package && \
+    ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg && \
+    pip install /tmp/tensorflow_pkg/tensorflow-2.5.whl
 
 # Clone HOOMD
 ENV HOOMD_TAG=v2.9.4
