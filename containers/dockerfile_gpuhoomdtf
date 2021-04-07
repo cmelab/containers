@@ -98,7 +98,7 @@ ENV PYTHON_BIN_PATH=/opt/conda/bin/python3 \
 # Clone Tensorflow
 RUN git clone https://github.com/tensorflow/tensorflow.git -b r2.5 --single-branch && \
     cd tensorflow && \
-    yes "" | ./configure && \
+    ./configure && \
     bazel build --config=opt --config=cuda //tensorflow/tools/pip_package:build_pip_package
 
 # Clone HOOMD
