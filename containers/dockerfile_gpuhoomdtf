@@ -25,15 +25,16 @@ RUN curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel
     apt-get update && \
     apt-get install -y bazel-3.7.2 && \
     apt-get clean && \
-    ln -s /usr/bin/bazel-3.7.2 /usr/bin/bazel
+    ln -s /usr/bin/bazel-3.7.2 /usr/bin/bazel && \
+    apt update && apt install bazel-3.7.2
+
+# By default running container starts bash shell
+CMD [ "/bin/bash" ]
 
 # Install miniconda
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 
 ENV PATH /opt/conda/bin:$PATH
-
-# By default running container starts bash shell
-CMD [ "/bin/bash" ]
 
 ENV CONDA_VERSION=py38_4.9.2
 ENV CONDA_MD5=122c8c9beb51e124ab32a0fa6426c656
@@ -76,8 +77,29 @@ RUN conda install -c conda-forge numpy=1.19.5 pip=20 python=3.7 wheel && \
     python --version && \
     python -m pip install --no-deps keras_preprocessing
 
+# Set TF env variables
+ENV PYTHON_BIN_PATH=/opt/conda/bin/python3 \
+    PYTHON_LIB_PATH=/opt/conda/lib/python3.7/site-packages \
+    # P100 -> 6.0, V100 -> 7.0
+    TF_NEED_CUDA=1 \
+    CUDA_TOOLKIT_PATH=/usr/local/cuda-10.2 \
+    TF_CUDNN_VERSION=8.1.1 \
+    CUDANN_INSTALL_PATH=/usr/include \
+    TF_CUDA_COMPUTE_CAPABILITIES=3.5,6.0,7.0 \
+    TF_CUDA_VERSION=10.2 \
+    GCC_HOST_COMPILER_PATH=/usr/bin/gcc \
+    CC_OPT_FLAGS="--config=cuda" \
+    TF_NEED_TENSORRT=0 \
+    TF_NEED_ROCM=0 \
+    TMP=/tmp \
+    TMP_DIR=/tmp \
+    TF_SET_ANDROID_WORKSPACE=0
+
 # Clone Tensorflow
-RUN git clone https://github.com/tensorflow/tensorflow.git -b r2.5 --single-branch
+RUN git clone https://github.com/tensorflow/tensorflow.git -b r2.5 --single-branch && \
+    cd tensorflow && \
+    yes "" | ./configure && \
+    bazel build --config=opt --config=cuda //tensorflow/tools/pip_package:build_pip_package
 
 # Clone HOOMD
 ENV HOOMD_TAG=v2.9.4
