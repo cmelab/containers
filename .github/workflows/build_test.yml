@@ -9,7 +9,7 @@ jobs:
   build_test:
     runs-on: ubuntu-latest
     env:
-        IMAGE: cmelab/test:
+        IMAGE: "cmelab/test:"
 
     steps:
       -
