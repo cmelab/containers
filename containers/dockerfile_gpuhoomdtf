@@ -15,6 +15,10 @@ RUN apt-get update && \
         curl \
         git \
         libcudnn8=${CUDNN}+cuda${CUDA} \
+	libcudart-11-0 \
+	libcublas-11-0 \
+	libcublasLt-11-0 \
+	libcusparse-11-0 \
         libfreetype6-dev \
         libhdf5-serial-dev \
         libtbb-dev \
@@ -99,6 +103,6 @@ RUN cd hoomd-blue && \
               -DBUILD_CGCMM=OFF \
               -DBUILD_DEPRECATED=OFF \
               -DBUILD_MPCD=OFF && \
-    make -j && \
+    make && \
     make install
 
