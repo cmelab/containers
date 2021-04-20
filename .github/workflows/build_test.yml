@@ -19,7 +19,7 @@ jobs:
         # GITHUB_REF will be /refs/tags/THETAGNAME
         # the following parameter substitution will return only THETAGNAME
         # https://www.gnu.org/software/bash/manual/bash.html#Shell-Parameter-Expansion
-        run: echo "IMAGE=cmelab/test:${GITHUB_REF##*/}" >> $GITHUB_ENV
+        run: echo "IMAGE='cmelab/test:'${GITHUB_REF##*/}" >> $GITHUB_ENV
       -
         name: Check IMAGE
         run: |
