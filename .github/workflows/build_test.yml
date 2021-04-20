@@ -41,7 +41,7 @@ jobs:
           context: .
           file: ./containers/dockerfile_test
           push: true
-          tags: cmelab/test:${{ env.TAG }}
+          tags: cmelab/test:$TAG
       -
         name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
