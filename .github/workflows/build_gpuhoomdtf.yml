@@ -9,6 +9,7 @@ on:
 
 jobs:
   build_gpuhoomdtf:
+    if: github.repository_owner == 'cmelab'
     runs-on: ubuntu-latest
 
     steps:
