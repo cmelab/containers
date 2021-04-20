@@ -22,7 +22,7 @@ jobs:
         run: echo "TAG=${GITHUB_REF##*/}" >> $GITHUB_ENV
       -
         name: Check tag
-        run: echo ${{ join("cmelab/test:", env.TAG) }}
+        run: echo ${{ format('cmelab/test:{0}', env.TAG) }}
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v1
