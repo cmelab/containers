@@ -96,8 +96,14 @@ ENV PYTHON_BIN_PATH=/opt/conda/bin/python3 \
     TF_SET_ANDROID_WORKSPACE=0
 
 # Clone Tensorflow
-RUN git clone https://github.com/tensorflow/tensorflow.git -b r2.5 --single-branch && \
+# https://github.com/tensorflow/tensorflow/pull/48393
+RUN git clone --depth 1 -b master https://github.com/tensorflow/tensorflow.git && \
     cd tensorflow && \
+    git fetch --depth 1 origin pull/48393/head:pr48393 && \
+    git checkout pr48393
+
+# Run bazel build
+RUN cd tensorflow && \
     ./configure && \
     bazel build --config=opt --config=cuda //tensorflow/tools/pip_package:build_pip_package
 
