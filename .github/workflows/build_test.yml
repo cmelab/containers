@@ -8,17 +8,21 @@ on:
 jobs:
   build_test:
     runs-on: ubuntu-latest
-    env:
-        # Because this PR is triggered on tags
-        # GITHUB_REF will be /refs/tags/THETAGNAME
-        # the following parameter substitution will return only THETAGNAME
-        # https://www.gnu.org/software/bash/manual/bash.html#Shell-Parameter-Expansion
-        TAG: ${GITHUB_REF##*/}
 
     steps:
       -
         name: Checkout
         uses: actions/checkout@v2
+      -
+        name: Set env "TAG"
+        # Because this PR is triggered on tags
+        # GITHUB_REF will be /refs/tags/THETAGNAME
+        # the following parameter substitution will return only THETAGNAME
+        # https://www.gnu.org/software/bash/manual/bash.html#Shell-Parameter-Expansion
+        run: echo "TAG=${GITHUB_REF##*/}" >> $GITHUB_ENV
+      -
+        name: Check tag
+        run: echo $TAG
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -31,9 +35,6 @@ jobs:
         with:
             username: ${{ secrets.DOCKERHUB_USERNAME }}
             password: ${{ secrets.DOCKERHUB_TOKEN }}
-      -
-        name: Check tag
-        run: echo ${{ env.TAG }}
       -
         name: Build and push
         uses: docker/build-push-action@v2
