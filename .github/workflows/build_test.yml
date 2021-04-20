@@ -8,8 +8,6 @@ on:
 jobs:
   build_test:
     runs-on: ubuntu-latest
-    env:
-        IMAGE: 'cmelab/test:'
 
     steps:
       -
@@ -22,21 +20,12 @@ jobs:
         # the following parameter substitution will return only THETAGNAME
         # https://www.gnu.org/software/bash/manual/bash.html#Shell-Parameter-Expansion
         run: echo "TAG=${GITHUB_REF##*/}" >> $GITHUB_ENV
-      - 
-        name: Set env "IMG_TAG"
-        run: echo "IMG_TAG=$IMAGE$TAG" >> $GITHUB_ENV
       -
         name: Check envs
         run: |
             echo $TAG
             echo ${{ env.TAG }}
             echo ${{ TAG }}
-            echo $IMAGE
-            echo ${{ env.IMAGE }}
-            echo ${{ IMAGE }}
-            echo $IMG_TAG
-            echo ${{ env.IMG_TAG }}
-            echo ${{ IMG_TAG }}
             #      -
             #        name: Set up QEMU
             #        uses: docker/setup-qemu-action@v1
