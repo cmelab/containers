@@ -13,7 +13,7 @@ jobs:
         # GITHUB_REF will be /refs/tags/THETAGNAME
         # the following parameter substitution will return only THETAGNAME
         # https://www.gnu.org/software/bash/manual/bash.html#Shell-Parameter-Expansion
-        TAG: echo ${GITHUB_REF##*/}
+        TAG: ${GITHUB_REF##*/}
 
     steps:
       -
