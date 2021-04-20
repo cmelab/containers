@@ -14,18 +14,18 @@ jobs:
         name: Checkout
         uses: actions/checkout@v2
       -
-        name: Set env "IMAGE"
+        name: Set env "TAG"
         # Because this PR is triggered on tags
         # GITHUB_REF will be /refs/tags/THETAGNAME
         # the following parameter substitution will return only THETAGNAME
         # https://www.gnu.org/software/bash/manual/bash.html#Shell-Parameter-Expansion
-        run: echo "IMAGE='cmelab/test:'${GITHUB_REF##*/}" >> $GITHUB_ENV
+        run: echo "TAG='cmelab/test:'${GITHUB_REF##*/}" >> $GITHUB_ENV
       -
-        name: Check IMAGE
+        name: Check TAG
         run: |
-            echo $IMAGE
-            echo ${{ env.IMAGE }}
-            echo ${{ IMAGE }}
+            echo $TAG
+            echo ${{ env.TAG }}
+            echo ${{ TAG }}
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -45,7 +45,7 @@ jobs:
           context: .
           file: ./containers/dockerfile_test
           push: true
-          tags: ${{ env.IMAGE }}
+          tags: ${{ env.TAG }}
       -
         name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
