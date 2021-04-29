@@ -18,41 +18,6 @@ RUN apt-get update && \
         libzmq3-dev \
     && apt-get clean
 
-ENV BAZEL_VER=3.99.0
-
-# Install Bazel
-RUN curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel.gpg && \
-    mv bazel.gpg /etc/apt/trusted.gpg.d/ && \
-    echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | tee /etc/apt/sources.list.d/bazel.list && \
-    apt-get update && \
-    apt-get install -y bazel-$BAZEL_VER && \
-    apt-get clean && \
-    ln -s /usr/bin/bazel-$BAZEL_VER /usr/bin/bazel
-
-# Install miniconda
-ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
-
-ENV PATH /opt/conda/bin:$PATH
-
-# By default running container starts bash shell
-CMD [ "/bin/bash" ]
-
-ENV CONDA_VERSION=py38_4.9.2
-ENV CONDA_MD5=122c8c9beb51e124ab32a0fa6426c656
-
-RUN curl -s https://repo.anaconda.com/miniconda/Miniconda3-${CONDA_VERSION}-Linux-x86_64.sh -o miniconda.sh && \
-    echo "${CONDA_MD5}  miniconda.sh" > miniconda.md5 && \
-    if ! md5sum --status -c miniconda.md5; then exit 1; fi && \
-    mkdir -p /opt && \
-    sh miniconda.sh -b -p /opt/conda && \
-    rm miniconda.sh miniconda.md5 && \
-    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
-    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
-    echo "conda activate base" >> ~/.bashrc && \
-    find /opt/conda/ -follow -type f -name '*.a' -delete && \
-    find /opt/conda/ -follow -type f -name '*.js.map' -delete && \
-    /opt/conda/bin/conda clean -afy
-
 WORKDIR /opt
 
 # Make RUN commands use `bash --login`: -- fixes conda init
@@ -64,9 +29,9 @@ SHELL ["/bin/bash", "--login", "-c"]
 ENV PYTHONPATH=/ignore/pythonpath
 
 # Install HOOMD and tensorflow deps
-RUN conda install -c conda-forge numpy=1.19.5 pip=20 python=3.7 wheel && \
-    python --version && \
-    python -m pip install --no-deps keras_preprocessing
+RUN python3 -m pip install numpy==1.19.5 wheel && \
+    python3 --version && \
+    python3 -m pip install --no-deps keras_preprocessing
 
 # Clone HOOMD
 ENV HOOMD_TAG=v2.9.4
@@ -78,17 +43,17 @@ RUN git clone --recursive https://github.com/glotzerlab/hoomd-blue.git -b $HOOMD
 # Link HOOMD-TF in HOOMD/hoomd modules
 RUN git clone -b cg_properties_update --single-branch https://github.com/ur-whitelab/hoomd-tf.git && \
     ln -s /opt/hoomd-tf/htf /opt/hoomd-blue/hoomd
-
+#RUN find /usr -name "*tensorflow*" && python3 --version && ffksdf
 # Compile HOOMD with HOOMD-TF
 RUN cd hoomd-blue && \
     mkdir build && \
     cd build && \
     cmake ../ -DENABLE_MPI=OFF \
               -DENABLE_CUDA=OFF \
-              -DPYTHON_EXECUTABLE=/opt/conda/bin/python3.7 \
+              -DPYTHON_EXECUTABLE=$(which python3) \
               -DCMAKE_C_COMPILER=$(which gcc) \
               -DCMAKE_CXX_COMPILER=$(which g++) \
-              -DCMAKE_INSTALL_PREFIX=/opt/conda/lib/python3.7/site-packages \
+              -DCMAKE_INSTALL_PREFIX=$(python3 -c "import site; print(site.getsitepackages()[0])") \
               -DBUILD_HPMC=OFF \
               -DBUILD_JIT=OFF \ 
               -DBUILD_METAL=OFF \ 
