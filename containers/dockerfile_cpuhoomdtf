@@ -18,20 +18,47 @@ RUN apt-get update && \
         libzmq3-dev \
     && apt-get clean
 
+# Install miniconda
+ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
+
+ENV PATH /opt/conda/bin:$PATH
+
+# By default running container starts bash shell
+CMD [ "/bin/bash" ]
+
+ENV CONDA_VERSION=py38_4.9.2
+ENV CONDA_MD5=122c8c9beb51e124ab32a0fa6426c656
+
+RUN curl -s https://repo.anaconda.com/miniconda/Miniconda3-${CONDA_VERSION}-Linux-x86_64.sh -o miniconda.sh && \
+    echo "${CONDA_MD5}  miniconda.sh" > miniconda.md5 && \
+    if ! md5sum --status -c miniconda.md5; then exit 1; fi && \
+    mkdir -p /opt && \
+    sh miniconda.sh -b -p /opt/conda && \
+    rm miniconda.sh miniconda.md5 && \
+    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
+    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
+    echo "conda activate base" >> ~/.bashrc && \
+    find /opt/conda/ -follow -type f -name '*.a' -delete && \
+    find /opt/conda/ -follow -type f -name '*.js.map' -delete && \
+    /opt/conda/bin/conda clean -afy
+
 WORKDIR /opt
+
+RUN git clone -b htf-cg --single-branch https://github.com/RainierBarrett/uli-init.git && \
+    cd uli-init && conda env update -n base -f environment.yml && conda clean --all --yes -f # buildkit
 
 # Make RUN commands use `bash --login`: -- fixes conda init
 # https://pythonspeed.com/articles/activate-conda-dockerfile/
-SHELL ["/bin/bash", "--login", "-c"]
+SHELL ["conda", "run", "-n", "base", "/bin/bash", "--login", "-c"]
 
 # Prevent python from loading packages from outside the container
 # default empty pythonpath
 ENV PYTHONPATH=/ignore/pythonpath
 
 # Install HOOMD and tensorflow deps
-RUN python3 -m pip install numpy==1.19.5 wheel && \
-    python3 --version && \
-    python3 -m pip install --no-deps keras_preprocessing
+RUN python -m pip install numpy==1.19.5 wheel tensorflow==2.4.1 && \
+    python --version && \
+    python -m pip install --no-deps keras_preprocessing
 
 # Clone HOOMD
 ENV HOOMD_TAG=v2.9.4
@@ -50,11 +77,14 @@ RUN cd hoomd-blue && \
     cd build && \
     cmake ../ -DENABLE_MPI=OFF \
               -DENABLE_CUDA=OFF \
-              -DPYTHON_EXECUTABLE=$(which python3) \
+              -DPYTHON_EXECUTABLE=$(which python) \
               -DCMAKE_C_COMPILER=$(which gcc) \
               -DCMAKE_CXX_COMPILER=$(which g++) \
-              -DCMAKE_INSTALL_PREFIX=$(python3 -c "import site; print(site.getsitepackages()[0])") \
+              -DCMAKE_INSTALL_PREFIX=$(python -c "import site; print(site.getsitepackages()[0])") \
+              -DPYTHON_INCLUDE_DIR=$(python -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())") \
+              -DPYTHON_LIBRARY=$(python -c "import distutils.sysconfig as sysconfig; print(sysconfig.get_config_var('LIBDIR'))") \
               -DBUILD_HPMC=OFF \
+              -DBUILD_TESTING=OFF \
               -DBUILD_JIT=OFF \ 
               -DBUILD_METAL=OFF \ 
               -DBUILD_DEM=OFF \
