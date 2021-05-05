@@ -45,7 +45,8 @@ RUN curl -s https://repo.anaconda.com/miniconda/Miniconda3-${CONDA_VERSION}-Linu
 WORKDIR /opt
 
 RUN git clone -b htf-cg --single-branch https://github.com/RainierBarrett/uli-init.git && \
-    cd uli-init && conda env update -n base -f environment.yml && conda clean --all --yes -f # buildkit
+    cd uli-init && conda env update -n base -f environment.yml && conda clean --all --yes -f && \
+    python -m pip install -e . # buildkit
 
 # Make RUN commands use `bash --login`: -- fixes conda init
 # https://pythonspeed.com/articles/activate-conda-dockerfile/
