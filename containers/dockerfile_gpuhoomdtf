@@ -18,7 +18,7 @@ RUN apt-get update && \
         libzmq3-dev \
     && apt-get clean
 
-ENV BAZEL_VER=3.99.0
+ENV BAZEL_VER=3.7.2
 
 # Install Bazel
 RUN curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel.gpg && \
@@ -27,15 +27,16 @@ RUN curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel
     apt-get update && \
     apt-get install -y bazel-$BAZEL_VER && \
     apt-get clean && \
-    ln -s /usr/bin/bazel-$BAZEL_VER /usr/bin/bazel
+    ln -s /usr/bin/bazel-3.7.2 /usr/bin/bazel && \
+    apt update && apt install bazel-3.7.2
+
+# By default running container starts bash shell
+CMD [ "/bin/bash" ]
 
 # Install miniconda
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 
 ENV PATH /opt/conda/bin:$PATH
-
-# By default running container starts bash shell
-CMD [ "/bin/bash" ]
 
 ENV CONDA_VERSION=py38_4.9.2
 ENV CONDA_MD5=122c8c9beb51e124ab32a0fa6426c656
@@ -78,51 +79,35 @@ RUN conda install -c conda-forge numpy=1.19.5 pip=20 python=3.7 wheel && \
     python --version && \
     python -m pip install --no-deps keras_preprocessing
 
-# Clone Tensorflow
-RUN git clone https://github.com/tensorflow/tensorflow.git -b r2.5 --single-branch
-    
-
-# set up specific cuda and cudnn versions and run configure    
-# run configure script with defaults c/o https://github.com/tensorflow/tensorflow/issues/8527
-# due to using CUDA 10.x, NCCL is in a different place than other cuda libs and not automatically found.
-# (see https://forums.developer.nvidia.com/t/cublas-for-10-1-is-missing/71015)
-RUN ln -s /usr/include/cublas_api.h /usr/local/cuda/cublas_api.h && \
-    ln -s /usr/lib/x86_64-linux-gnu/libcublas.so.10.2.2.89 /usr/local/cuda/libcublas.so.10.2.2.89 && \
-    ln -s /usr/lib/x86_64-linux-gnu/libcublas.so.10.2.2.89 /usr/local/cuda/libcublas.so.10 && \
-    ln -s /usr/lib/x86_64-linux-gnu/libcublasLt.so.10.2.2.89 /usr/local/cuda/libcublasLt.so.10.2.2.89 && \
-    ln -s /usr/lib/x86_64-linux-gnu/libcublasLt.so.10.2.2.89 /usr/local/cuda/libcublasLt.so.10
-
-RUN for a in $(ls /usr/include/x86_64-linux-gnu/cudnn*v8*); \
-    do fname=$(echo $a | sed 's/.*\/cudnn/cudnn/' | sed 's/_v8//'); ln -s $a /usr/include/x86_64-linux-gnu/$fname; done
-
-ENV TF_NEED_CUDA=1 \
-    TF_CUDA_VERSION=10.2 \
+# Set TF env variables
+ENV PYTHON_BIN_PATH=/opt/conda/bin/python3 \
+    PYTHON_LIB_PATH=/opt/conda/lib/python3.7/site-packages \
+    # P100 -> 6.0, V100 -> 7.0
+    TF_NEED_CUDA=1 \
     CUDA_TOOLKIT_PATH=/usr/local/cuda-10.2 \
     TF_CUDNN_VERSION=8.1.1 \
-    TF_CUDA_PATHS=/usr/local/cuda-10.2 \
-    CUDNN_INSTALL_PATH=/usr/lib/x86_64-linux-gnu/ \
-    TF_NCCL_VERSION=2.8.4 \
-    NCCL_INSTALL_PATH=/usr/lib/x86_64-linux-gnu \
-    TF_CUBLAS_VERSION=10.2 \
+    CUDANN_INSTALL_PATH=/usr/include \
+    TF_CUDA_COMPUTE_CAPABILITIES=3.5,6.0,7.0 \
+    TF_CUDA_VERSION=10.2 \
+    GCC_HOST_COMPILER_PATH=/usr/bin/gcc \
+    CC_OPT_FLAGS="--config=cuda" \
     TF_NEED_TENSORRT=0 \
     TF_NEED_ROCM=0 \
-    TMP=/tmp
+    TMP=/tmp \
+    TMP_DIR=/tmp \
+    TF_SET_ANDROID_WORKSPACE=0
 
-ENV PATCH_TEXT='    http_archive(\n\
-        name = "io_bazel_rules_docker",\n\
-        sha256 = "95d39fd84ff4474babaf190450ee034d958202043e366b9fc38f438c9e6c3334",\n\
-        strip_prefix = "rules_docker-0.16.0",\n\
-        urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.16.0/rules_docker-v0.16.0.tar.gz"]\n\
-    )\n'
-#RUN find /usr -name "*cuda*" && ffksdf
+# Clone Tensorflow
+# https://github.com/tensorflow/tensorflow/pull/48393
+RUN git clone --depth 1 -b master https://github.com/tensorflow/tensorflow.git && \
+    cd tensorflow && \
+    git fetch --depth 1 origin pull/48393/head:pr48393 && \
+    git checkout pr48393
+
+# Run bazel build
 RUN cd tensorflow && \
-    sed -zie 's@def workspace():@def workspace():\n'"$PATCH_TEXT"'\n@' tensorflow/workspace3.bzl && \
-    #cat tensorflow/workspace3.bzl && FFF && \
-    chmod u+x ./configure && \
-    yes '' | ./configure && \
-    bazel build --verbose_failures //tensorflow/tools/pip_package:build_pip_package && \
-    ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg && \
-    pip install /tmp/tensorflow_pkg/tensorflow-2.5.whl
+    ./configure && \
+    bazel build --config=opt --config=cuda //tensorflow/tools/pip_package:build_pip_package
 
 # Clone HOOMD
 ENV HOOMD_TAG=v2.9.4

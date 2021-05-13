@@ -9,6 +9,7 @@ on:
 
 jobs:
   build_gpuhoomdconda:
+    if: github.repository_owner == 'cmelab'
     runs-on: ubuntu-latest
 
     steps:
