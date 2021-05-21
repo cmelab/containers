@@ -95,6 +95,10 @@ RUN for a in $(ls /usr/include/x86_64-linux-gnu/cudnn*v8*); \
 # https://github.com/tensorflow/tensorflow/pull/48393
 RUN git clone --depth 1 -b master https://github.com/tensorflow/tensorflow.git 
 
+# tell nvidia where to find cuda libs directly
+RUN sh -c "echo '/usr/local/cuda-10.2/lib64' >> /etc/ld.so.conf.d/nvidia.conf" && \
+    ldconfig
+
 # Set TF env variables
 ENV PYTHON_BIN_PATH=/opt/conda/bin/python3 \
     PYTHON_LIB_PATH=/opt/conda/lib/python3.7/site-packages \
@@ -107,26 +111,21 @@ ENV PYTHON_BIN_PATH=/opt/conda/bin/python3 \
     TF_NCCL_VERSION=2 \
     NCCL_INSTALL_PATH=/usr/ \
     TF_CUBLAS_VERSION=10.2 \    
-    TF_CUDA_COMPUTE_CAPABILITIES=3.5,6.0,7.0 \
+    TF_CUDA_COMPUTE_CAPABILITIES=6.0,7.0 \
     TF_CUDA_VERSION=10.2 \
     GCC_HOST_COMPILER_PATH=/usr/bin/gcc \
-    CC_OPT_FLAGS="--config=cuda" \
     TF_NEED_TENSORRT=0 \
     TF_NEED_ROCM=0 \
     TMP=/tmp \
     TMP_DIR=/tmp \
     TF_SET_ANDROID_WORKSPACE=0
 
-#RUN find /usr -name "nccl.h" && cat /usr/include/nccl.h && fdsfkdsf
-
-RUN cd tensorflow && \
-    git fetch --depth 1 origin pull/48393/head:pr48393 && \
-    git checkout pr48393
+RUN sed -ie "s/return subprocess.call/cpu_compiler_flags.append('-fno-use-linker-plugin')\n  return subprocess.call/" tensorflow/third_party/gpus/crosstool/clang/bin/crosstool_wrapper_driver_is_not_gcc.tpl
 
 # Run bazel build
 RUN cd tensorflow && \
     ./configure && \
-    bazel build --config=opt --config=cuda //tensorflow/tools/pip_package:build_pip_package
+    bazel build -c opt --config=cuda --verbose_failures //tensorflow/tools/pip_package:build_pip_package
 
 # Clone HOOMD
 ENV HOOMD_TAG=v2.9.4
