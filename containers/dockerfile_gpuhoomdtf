@@ -139,22 +139,22 @@ RUN git clone -b cg_properties_update --single-branch https://github.com/ur-whit
     ln -s /opt/hoomd-tf/htf /opt/hoomd-blue/hoomd
 
 # Install HOOMD
-#RUN cd hoomd-blue && \
-#    mkdir build && \
-#    cd build && \
-#    cmake ../ -DENABLE_MPI=OFF \
-#              -DENABLE_CUDA=ON \
-#              -DPYTHON_EXECUTABLE=/opt/conda/bin/python3.7 \
-#              -DCMAKE_C_COMPILER=$(which gcc) \
-#              -DCMAKE_CXX_COMPILER=$(which g++) \
-#              -DCMAKE_INSTALL_PREFIX=/opt/conda/lib/python3.7/site-packages \
-#              -DBUILD_HPMC=OFF \
-#              -DBUILD_JIT=OFF \ 
-#              -DBUILD_METAL=OFF \ 
-#              -DBUILD_DEM=OFF \
-#              -DBUILD_CGCMM=OFF \
-#              -DBUILD_DEPRECATED=OFF \
-#              -DBUILD_MPCD=OFF && \
-#    make && \
-#    make install
-#
+RUN cd hoomd-blue && \
+    mkdir build && \
+    cd build && \
+    cmake ../ -DENABLE_MPI=OFF \
+              -DENABLE_CUDA=ON \
+              -DPYTHON_EXECUTABLE=/opt/conda/bin/python3.7 \
+              -DCMAKE_C_COMPILER=$(which gcc) \
+              -DCMAKE_CXX_COMPILER=$(which g++) \
+              -DCMAKE_INSTALL_PREFIX=/opt/conda/lib/python3.7/site-packages \
+              -DBUILD_HPMC=OFF \
+              -DBUILD_JIT=OFF \ 
+              -DBUILD_METAL=OFF \ 
+              -DBUILD_DEM=OFF \
+              -DBUILD_CGCMM=OFF \
+             -DBUILD_DEPRECATED=OFF \
+              -DBUILD_MPCD=OFF && \
+    make && \
+    make install
+
