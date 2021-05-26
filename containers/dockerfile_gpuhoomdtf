@@ -1,37 +1,42 @@
-FROM nvidia/cuda:10.2-devel 
+FROM nvidia/cuda:10.2-cudnn8-devel-ubuntu18.04 
 
 # Install system dependencies
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
 
-# Set cuda versions
-ARG CUDA=10.2
-ARG CUDNN=8.1.0.77-1
-
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
+        apt-transport-https \
         ca-certificates \
         cmake \
         curl \
         git \
-        libcudnn8=${CUDNN}+cuda${CUDA} \
-	libcudart-11-0 \
-	libcublas-11-0 \
-	libcublasLt-11-0 \
-	libcusparse-11-0 \
+        gnupg \
         libfreetype6-dev \
         libhdf5-serial-dev \
         libtbb-dev \
         libzmq3-dev \
     && apt-get clean
 
+ENV BAZEL_VER=3.7.2
+
+# Install Bazel
+RUN curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel.gpg && \
+    mv bazel.gpg /etc/apt/trusted.gpg.d/ && \
+    echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | tee /etc/apt/sources.list.d/bazel.list && \
+    apt-get update && \
+    apt-get install -y bazel-$BAZEL_VER && \
+    apt-get clean && \
+    ln -s /usr/bin/bazel-3.7.2 /usr/bin/bazel && \
+    apt update && apt install bazel-3.7.2
+
+# By default running container starts bash shell
+CMD [ "/bin/bash" ]
+
 # Install miniconda
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 
 ENV PATH /opt/conda/bin:$PATH
-
-# By default running container starts bash shell
-CMD [ "/bin/bash" ]
 
 ENV CONDA_VERSION=py38_4.9.2
 ENV CONDA_MD5=122c8c9beb51e124ab32a0fa6426c656
@@ -61,7 +66,7 @@ ENV PYTHONPATH=/ignore/pythonpath
 
 ## Tensorflow installation
 # For CUDA profiling, TensorFlow requires CUPTI.
-ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+ENV LD_LIBRARY_PATH /usr/include:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 
 # Link the libcuda stub to the location where tensorflow is searching for it and reconfigure
 # dynamic linker run-time bindings
@@ -69,17 +74,64 @@ RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/lib
     && echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/z-cuda-stubs.conf \
     && ldconfig
 
-# Install HOOMD deps and tensorflow
-RUN conda install -c conda-forge numpy=1.19.5 pip python=3.7 && \
+# Install HOOMD and tensorflow deps
+RUN conda install -c conda-forge numpy=1.19.5 pip=20 python=3.7 wheel && \
     python --version && \
-    python -m pip install --no-cache-dir tensorflow==2.4.1
+    python -m pip install --no-deps keras_preprocessing
+
+# due to using CUDA 10.x, NCCL is in a different place than other cuda libs and not automatically found.
+# (see https://forums.developer.nvidia.com/t/cublas-for-10-1-is-missing/71015)
+RUN ln -s /usr/include/cublas_api.h /usr/local/cuda/cublas_api.h && \
+    ln -s /usr/lib/x86_64-linux-gnu/libcublas.so.10.2.2.89 /usr/local/cuda/libcublas.so.10.2.2.89 && \
+    ln -s /usr/lib/x86_64-linux-gnu/libcublas.so.10.2.2.89 /usr/local/cuda/libcublas.so.10 && \
+    ln -s /usr/lib/x86_64-linux-gnu/libcublasLt.so.10.2.2.89 /usr/local/cuda/libcublasLt.so.10.2.2.89 && \
+    ln -s /usr/lib/x86_64-linux-gnu/libcublasLt.so.10.2.2.89 /usr/local/cuda/libcublasLt.so.10
+
+RUN for a in $(ls /usr/include/x86_64-linux-gnu/cudnn*v8*); \
+    do fname=$(echo $a | sed 's/.*\/cudnn/cudnn/' | sed 's/_v8//'); ln -s $a /usr/include/x86_64-linux-gnu/$fname; done
+
+
+# Clone Tensorflow
+# https://github.com/tensorflow/tensorflow/pull/48393
+RUN git clone --depth 1 -b master https://github.com/tensorflow/tensorflow.git 
+
+# tell nvidia where to find cuda libs directly
+RUN sh -c "echo '/usr/local/cuda-10.2/lib64' >> /etc/ld.so.conf.d/nvidia.conf" && \
+    ldconfig
+
+# Set TF env variables
+ENV PYTHON_BIN_PATH=/opt/conda/bin/python3 \
+    PYTHON_LIB_PATH=/opt/conda/lib/python3.7/site-packages \
+    # P100 -> 6.0, V100 -> 7.0
+    TF_NEED_CUDA=1 \
+    CUDA_TOOLKIT_PATH=/usr/local/cuda-10.2 \
+    TF_CUDNN_VERSION=8 \
+    TF_CUDA_PATHS=/usr/ \
+    TF_CUDNN_INSTALL_PATH=/usr \
+    TF_NCCL_VERSION=2 \
+    NCCL_INSTALL_PATH=/usr/ \
+    TF_CUBLAS_VERSION=10.2 \    
+    TF_CUDA_COMPUTE_CAPABILITIES=6.0,7.0 \
+    TF_CUDA_VERSION=10.2 \
+    GCC_HOST_COMPILER_PATH=/usr/bin/gcc \
+    TF_NEED_TENSORRT=0 \
+    TF_NEED_ROCM=0 \
+    TMP=/tmp \
+    TMP_DIR=/tmp \
+    TF_SET_ANDROID_WORKSPACE=0
+
+RUN sed -ie "s/return subprocess.call/cpu_compiler_flags.append('-fno-use-linker-plugin')\n  return subprocess.call/" tensorflow/third_party/gpus/crosstool/clang/bin/crosstool_wrapper_driver_is_not_gcc.tpl
+
+# Run bazel build
+RUN cd tensorflow && \
+    ./configure && \
+    bazel build -c opt --config=cuda --verbose_failures //tensorflow/tools/pip_package:build_pip_package
 
 # Clone HOOMD
 ENV HOOMD_TAG=v2.9.4
 
-RUN git clone --recursive https://github.com/glotzerlab/hoomd-blue.git && \
+RUN git clone --recursive https://github.com/glotzerlab/hoomd-blue.git -b $HOOMD_TAG --single-branch && \
     cd hoomd-blue && \
-    git checkout $HOOMD_TAG && \
     git submodule update
 
 # Link HOOMD-TF in HOOMD/hoomd modules
@@ -87,22 +139,22 @@ RUN git clone -b cg_properties_update --single-branch https://github.com/ur-whit
     ln -s /opt/hoomd-tf/htf /opt/hoomd-blue/hoomd
 
 # Install HOOMD
-RUN cd hoomd-blue && \
-    mkdir build && \
-    cd build && \
-    cmake ../ -DENABLE_MPI=OFF \
-              -DENABLE_CUDA=ON \
-              -DPYTHON_EXECUTABLE=/opt/conda/bin/python3.7 \
-              -DCMAKE_C_COMPILER=$(which gcc) \
-              -DCMAKE_CXX_COMPILER=$(which g++) \
-              -DCMAKE_INSTALL_PREFIX=/opt/conda/lib/python3.7/site-packages \
-              -DBUILD_HPMC=OFF \
-              -DBUILD_JIT=OFF \ 
-              -DBUILD_METAL=OFF \ 
-              -DBUILD_DEM=OFF \
-              -DBUILD_CGCMM=OFF \
-              -DBUILD_DEPRECATED=OFF \
-              -DBUILD_MPCD=OFF && \
-    make && \
-    make install
-
+#RUN cd hoomd-blue && \
+#    mkdir build && \
+#    cd build && \
+#    cmake ../ -DENABLE_MPI=OFF \
+#              -DENABLE_CUDA=ON \
+#              -DPYTHON_EXECUTABLE=/opt/conda/bin/python3.7 \
+#              -DCMAKE_C_COMPILER=$(which gcc) \
+#              -DCMAKE_CXX_COMPILER=$(which g++) \
+#              -DCMAKE_INSTALL_PREFIX=/opt/conda/lib/python3.7/site-packages \
+#              -DBUILD_HPMC=OFF \
+#              -DBUILD_JIT=OFF \ 
+#              -DBUILD_METAL=OFF \ 
+#              -DBUILD_DEM=OFF \
+#              -DBUILD_CGCMM=OFF \
+#              -DBUILD_DEPRECATED=OFF \
+#              -DBUILD_MPCD=OFF && \
+#    make && \
+#    make install
+#
