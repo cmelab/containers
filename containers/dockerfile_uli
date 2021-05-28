@@ -1,0 +1,7 @@
+FROM cmelab/gpuhoomdtf:latest
+
+# Install prerequisite packages for HTF and ULI
+RUN python -m pip install mbuild matplotlib foyer gsd parmed scipy signac signac-flow networkx ele
+RUN git clone --single-branch https://github.com/cmelab/uli-init && \
+    cd uli-init && \
+    conda env update base -f environment-nohoomd.yml
