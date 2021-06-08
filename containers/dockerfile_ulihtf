@@ -1,5 +1,9 @@
 FROM cmelab/gpuhoomdtf:latest
 
+# Make RUN commands use `bash --login`: -- fixes conda init
+# https://pythonspeed.com/articles/activate-conda-dockerfile/
+SHELL ["/bin/bash", "--login", "-c"]
+
 # Install prerequisite packages for HTF and ULI
 RUN python -m pip install mbuild matplotlib foyer gsd parmed scipy signac signac-flow networkx ele lark deepsmiles
 RUN git clone --single-branch https://github.com/RainierBarrett/uli-init --branch htf-cg && \
