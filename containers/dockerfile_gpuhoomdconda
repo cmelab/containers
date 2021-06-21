@@ -52,7 +52,7 @@ RUN conda install -c conda-forge numpy python=3.7 && \
     python --version
 
 # Install HOOMD
-ENV HOOMD_TAG=v2.9.4
+ENV HOOMD_TAG=v2.9.6
 
 RUN git clone --recursive https://github.com/glotzerlab/hoomd-blue.git && \
     cd hoomd-blue && \
