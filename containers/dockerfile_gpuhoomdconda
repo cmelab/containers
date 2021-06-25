@@ -47,6 +47,8 @@ SHELL ["/bin/bash", "--login", "-c"]
 # default empty pythonpath
 ENV PYTHONPATH=/ignore/pythonpath
 
+ENV PYTHONUSERBASE=/ignore/pythonpath
+
 # Install HOOMD deps
 RUN conda install -c conda-forge numpy python=3.7 && \
     python --version

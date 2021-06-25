@@ -48,3 +48,5 @@ SHELL ["/bin/bash", "--login", "-c"]
 # default empty pythonpath
 ENV PYTHONPATH=/ignore/pythonpath
 
+ENV PYTHONUSERBASE=/ignore/pythonpath
+
