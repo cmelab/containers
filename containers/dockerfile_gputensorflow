@@ -122,8 +122,17 @@ ENV PYTHON_BIN_PATH=/opt/conda/bin/python3 \
 
 RUN sed -ie "s/return subprocess.call/cpu_compiler_flags.append('-fno-use-linker-plugin')\n  return subprocess.call/" tensorflow/third_party/gpus/crosstool/clang/bin/crosstool_wrapper_driver_is_not_gcc.tpl
 
-# Run bazel build
+# Run bazel build to make the executable to generate pip .whl
 RUN cd tensorflow && \
     ./configure && \
     bazel build -c opt --config=cuda --verbose_failures //tensorflow/tools/pip_package:build_pip_package
 
+# create the pip package
+RUN cd tensorflow && \
+    ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
+
+# actually install the TF package
+RUN cd tensorflow && \
+    ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg && \
+    fname=$(ls /tmp/tensorflow_pkg/ | grep whl) && \
+    pip install /tmp/tensorflow_pkg/$fname
