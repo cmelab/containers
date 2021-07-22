@@ -1,4 +1,4 @@
-FROM nvidia/cuda:10.1-cudnn8-devel-ubuntu18.04 
+FROM nvidia/cuda:10.2-cudnn8-devel-ubuntu18.04 
 
 # Install system dependencies
 ENV DEBIAN_FRONTEND=noninteractive
@@ -19,7 +19,6 @@ RUN apt-get update && \
     && apt-get clean
 
 ENV BAZEL_VER=3.7.2
-ENV CUDA_VER=10.1
 
 # Install Bazel
 RUN curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel.gpg && \
@@ -28,8 +27,8 @@ RUN curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel
     apt-get update && \
     apt-get install -y bazel-$BAZEL_VER && \
     apt-get clean && \
-    ln -s /usr/bin/bazel-$BAZEL_VER /usr/bin/bazel && \
-    apt update && apt install bazel-$BAZEL_VER
+    ln -s /usr/bin/bazel-3.7.2 /usr/bin/bazel && \
+    apt update && apt install bazel-3.7.2
 
 # By default running container starts bash shell
 CMD [ "/bin/bash" ]
@@ -76,16 +75,17 @@ RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/lib
     && ldconfig
 
 # Install HOOMD and tensorflow deps
-RUN conda install -c conda-forge "numpy<1.19.0,>=1.17.0" pip=20 python=3.7 wheel && \
+RUN conda install -c conda-forge numpy=1.19.5 pip=20 python=3.7 wheel && \
     python --version && \
     python -m pip install --no-deps keras_preprocessing
 
 # due to using CUDA 10.x, NCCL is in a different place than other cuda libs and not automatically found.
 # (see https://forums.developer.nvidia.com/t/cublas-for-10-1-is-missing/71015)
-RUN ln -s /usr/include/cublas_api.h /usr/local/cuda/cublas_api.h
-
-RUN for a in $(ls /usr/lib/x86_64-linux-gnu/libcublas*); do ln -s /usr/lib/x86_64-linux-gnu/$a $(echo $a | sed -e 's/\/usr\/lib\/x86_64-linux-gnu\//\/usr\/local\/cuda\//g'); done
-
+RUN ln -s /usr/include/cublas_api.h /usr/local/cuda/cublas_api.h && \
+    ln -s /usr/lib/x86_64-linux-gnu/libcublas.so.10.2.2.89 /usr/local/cuda/libcublas.so.10.2.2.89 && \
+    ln -s /usr/lib/x86_64-linux-gnu/libcublas.so.10.2.2.89 /usr/local/cuda/libcublas.so.10 && \
+    ln -s /usr/lib/x86_64-linux-gnu/libcublasLt.so.10.2.2.89 /usr/local/cuda/libcublasLt.so.10.2.2.89 && \
+    ln -s /usr/lib/x86_64-linux-gnu/libcublasLt.so.10.2.2.89 /usr/local/cuda/libcublasLt.so.10
 
 RUN for a in $(ls /usr/include/x86_64-linux-gnu/cudnn*v8*); \
     do fname=$(echo $a | sed 's/.*\/cudnn/cudnn/' | sed 's/_v8//'); ln -s $a /usr/include/x86_64-linux-gnu/$fname; done
@@ -96,7 +96,7 @@ RUN for a in $(ls /usr/include/x86_64-linux-gnu/cudnn*v8*); \
 RUN git clone --depth 1 -b master https://github.com/tensorflow/tensorflow.git 
 
 # tell nvidia where to find cuda libs directly
-RUN sh -c "echo '/usr/local/cuda-$CUDA_VER/lib64' >> /etc/ld.so.conf.d/nvidia.conf" && \
+RUN sh -c "echo '/usr/local/cuda-10.2/lib64' >> /etc/ld.so.conf.d/nvidia.conf" && \
     ldconfig
 
 # Set TF env variables
@@ -104,14 +104,15 @@ ENV PYTHON_BIN_PATH=/opt/conda/bin/python3 \
     PYTHON_LIB_PATH=/opt/conda/lib/python3.7/site-packages \
     # P100 -> 6.0, V100 -> 7.0
     TF_NEED_CUDA=1 \
-    CUDA_TOOLKIT_PATH=/usr/local/cuda-$CUDA_VER \
+    CUDA_TOOLKIT_PATH=/usr/local/cuda-10.2 \
     TF_CUDNN_VERSION=8 \
     TF_CUDA_PATHS=/usr/ \
     TF_CUDNN_INSTALL_PATH=/usr \
     TF_NCCL_VERSION=2 \
     NCCL_INSTALL_PATH=/usr/ \
+    TF_CUBLAS_VERSION=10.2 \    
     TF_CUDA_COMPUTE_CAPABILITIES=6.0,7.0 \
-    TF_CUDA_VERSION=$CUDA_VER \
+    TF_CUDA_VERSION=10.2 \
     GCC_HOST_COMPILER_PATH=/usr/bin/gcc \
     TF_NEED_TENSORRT=0 \
     TF_NEED_ROCM=0 \
@@ -124,7 +125,7 @@ RUN sed -ie "s/return subprocess.call/cpu_compiler_flags.append('-fno-use-linker
 # Run bazel build
 RUN cd tensorflow && \
     ./configure && \
-    bazel build -c opt --config=cuda --verbose_failures --local_ram_resources 2048 --local_cpu_resources 1 -j 1 //tensorflow/tools/pip_package:build_pip_package
+    bazel build -c opt --config=cuda --verbose_failures //tensorflow/tools/pip_package:build_pip_package
 
 # Clone HOOMD
 ENV HOOMD_TAG=v2.9.4
