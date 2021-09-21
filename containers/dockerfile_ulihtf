@@ -4,6 +4,13 @@ FROM cmelab/gpuhoomdtf:latest
 # https://pythonspeed.com/articles/activate-conda-dockerfile/
 SHELL ["/bin/bash", "--login", "-c"]
 
+WORKDIR /opt
+
+# grab any updates to HTF and install them
+RUN cd hoomd-tf && git pull
+RUN cd hoomd-blue/build && \
+    make install
+
 # Install prerequisite packages for HTF and ULI
 RUN python -m pip install mbuild matplotlib foyer gsd parmed scipy signac signac-flow networkx ele lark deepsmiles
 RUN git clone --single-branch https://github.com/RainierBarrett/uli-init --branch htf-cg && \
@@ -12,4 +19,3 @@ RUN git clone --single-branch https://github.com/RainierBarrett/uli-init --branc
     conda install -c conda-forge openmm lxml oset mdanalysis
 RUN cd uli-init && \
     pip install -e .
-    
