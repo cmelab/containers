@@ -14,7 +14,7 @@ RUN git clone --recursive https://github.com/glotzerlab/hoomd-blue.git -b $HOOMD
     git submodule update
 
 # Link HOOMD-TF in HOOMD/hoomd modules
-RUN git clone -b mapped_nlist_positions_fix --single-branch https://github.com/ur-whitelab/hoomd-tf.git && \
+RUN git clone -b master --single-branch https://github.com/ur-whitelab/hoomd-tf.git && \
     ln -s /opt/hoomd-tf/htf /opt/hoomd-blue/hoomd
 
 # Install HOOMD with HOOMD-TF
