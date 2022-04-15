@@ -62,7 +62,7 @@ RUN git clone --recursive https://github.com/glotzerlab/hoomd-blue.git && \
     git checkout $HOOMD_TAG && \
     git submodule update && \
     cmake -B build/hoomd -S . && \
-    cmake -B build/hoomd -DENABLE_MPI=OFF \
+    cmake --build build/hoomd -DENABLE_MPI=OFF \
               -DENABLE_GPU=ON \
               -DPYTHON_EXECUTABLE=/opt/conda/bin/python3.9 \
               -DCMAKE_C_COMPILER=$(which gcc) \
@@ -75,6 +75,5 @@ RUN git clone --recursive https://github.com/glotzerlab/hoomd-blue.git && \
               -DBUILD_CGCMM=OFF \
               -DBUILD_MPCD=OFF \
               -DSINGLE_PRECISION=ON && \
-    cmake --build build/hoomd && \
     cmake --install build/hoomd
 
