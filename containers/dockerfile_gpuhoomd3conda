@@ -27,6 +27,7 @@ RUN apt-get update && apt-get upgrade -y && \
         libtbb-dev \
     && apt-get clean
 
+
 # Install miniconda
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 
@@ -68,24 +69,23 @@ RUN conda install -c conda-forge numpy pybind11 python=3.9 && \
     python --version
 
 # Install HOOMD
-ENV HOOMD_TAG=v3.0.1
+ENV HOOMD_TAG=v3.1.0
 
 RUN git clone --recursive https://github.com/glotzerlab/hoomd-blue.git && \
     cd hoomd-blue && \
     git checkout $HOOMD_TAG && \
     git submodule update && \
     cd .. && \
-    mkdir -p build/hoomd && \
+    mkdir build && \
     cd build && \
-    cmake -B hoomd -S ../hoomd-blue -DENABLE_MPI=OFF \
+    cmake -B . -S ../hoomd-blue -DENABLE_MPI=OFF \
               -DENABLE_GPU=ON \
               -DPYTHON_EXECUTABLE=/opt/conda/bin/python3.9 \
               -DCMAKE_C_COMPILER=$(which gcc) \
               -DCMAKE_CXX_COMPILER=$(which g++) \
               -DCMAKE_INSTALL_PREFIX=/opt/conda/lib/python3.9/site-packages \
               -DBUILD_HPMC=OFF \
-              -DBUILD_METAL=OFF \ 
-              -DSINGLE_PRECISION=ON && \
+              -DBUILD_METAL=OFF && \ 
     cmake --build hoomd && \
     cmake --install hoomd
 
