@@ -85,7 +85,9 @@ RUN git clone --recursive https://github.com/glotzerlab/hoomd-blue.git && \
               -DCMAKE_CXX_COMPILER=$(which g++) \
               -DCMAKE_INSTALL_PREFIX=/opt/conda/lib/python3.9/site-packages \
               -DBUILD_HPMC=OFF \
-              -DBUILD_METAL=OFF && \ 
+              -DBUILD_METAL=OFF \ 
+              -DBUILD_TESTING=OFF \
+              -DSINGLE_PRECISION=ON && \
     cmake --build hoomd && \
     cmake --install hoomd
 
