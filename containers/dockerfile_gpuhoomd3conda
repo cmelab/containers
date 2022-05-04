@@ -87,6 +87,8 @@ RUN git clone --recursive https://github.com/glotzerlab/hoomd-blue.git && \
               -DBUILD_HPMC=OFF \
               -DBUILD_METAL=OFF \ 
               -DBUILD_TESTING=OFF \
+              -DENABLE_MPI=OFF \
+              -DENABLE_MPI_CUDA=OFF \
               -DSINGLE_PRECISION=ON && \
     cmake --build hoomd && \
     cmake --install hoomd
