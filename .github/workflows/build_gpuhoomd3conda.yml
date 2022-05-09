@@ -6,6 +6,8 @@ on:
     # Run when container is changed
     paths:
         - 'containers/dockerfile_gpuhoomd3conda'
+  # Allows workflow to be manually triggered
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
