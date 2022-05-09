@@ -1,3 +1,4 @@
 FROM cmelab/gpuconda:latest
 
-RUN conda install -c conda-forge hoomd=*=*gpu*
+RUN conda update -n base -c defaults conda && \
+    conda install -c conda-forge hoomd=3*=*gpu* cudatoolkit=10.2
