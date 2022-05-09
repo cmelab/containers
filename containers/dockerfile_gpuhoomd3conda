@@ -1,5 +1,7 @@
 FROM cmelab/gpuconda:latest
 
+ENV CONDA_OVERRIDE_CUDA=10.2
+
 RUN conda update -n base -c defaults conda && \
     conda info && \
     conda install mamba -n base -c conda-forge && \
