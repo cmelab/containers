@@ -37,4 +37,4 @@ jobs:
           context: .
           file: ./containers/dockerfile_gpuhoomd3conda
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          tags: ${{ env.REGISTRY }}/cmelab/${{ env.IMAGE_NAME }}:latest
