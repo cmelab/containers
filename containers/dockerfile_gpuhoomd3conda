@@ -1,4 +1,6 @@
 FROM cmelab/gpuconda:latest
 
 RUN conda update -n base -c defaults conda && \
-    conda install -c conda-forge hoomd=3*=*gpu* cudatoolkit=10.2 python
+    conda info && \
+    conda install mamba -n base -c conda-forge && \
+    mamba install -c conda-forge hoomd=3*=*gpu* cudatoolkit=10.2 python
