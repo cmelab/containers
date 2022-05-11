@@ -4,35 +4,50 @@ FROM cmelab/gputensorflow:latest
 # https://pythonspeed.com/articles/activate-conda-dockerfile/
 SHELL ["/bin/bash", "--login", "-c"]
 
+# Prevent python from loading packages from outside the container
+# default empty pythonpath
+ENV PYTHONPATH=/ignore/pythonpath
+
+ENV PYTHONUSERBASE=/ignore/pythonpath
+
 WORKDIR /opt
 
-# Clone HOOMD
-ENV HOOMD_TAG=v2.9.4
+RUN conda install pybind11 eigen pytest-forked
 
-RUN git clone --recursive https://github.com/glotzerlab/hoomd-blue.git -b $HOOMD_TAG --single-branch && \
-    cd hoomd-blue && \
-    git submodule update
+# Clone HOOMD
+ENV HOOMD_TAG=v3.0.0-beta.9
+
+RUN git clone --recursive https://github.com/glotzerlab/hoomd-blue.git -b $HOOMD_TAG --single-branch
 
 # Link HOOMD-TF in HOOMD/hoomd modules
-RUN git clone -b master --single-branch https://github.com/ur-whitelab/hoomd-tf.git && \
-    ln -s /opt/hoomd-tf/htf /opt/hoomd-blue/hoomd
+RUN git clone -b hoomd3-update --single-branch https://github.com/ur-whitelab/hoomd-tf.git
+
+
+WORKDIR /opt/hoomd-blue
 
 # Install HOOMD with HOOMD-TF
-RUN cd hoomd-blue && \
-    mkdir build && \
-    cd build && \
-    cmake ../ -DENABLE_MPI=OFF \
-              -DENABLE_CUDA=ON \
-              -DPYTHON_EXECUTABLE=/opt/conda/bin/python3.7 \
-              -DCMAKE_C_COMPILER=$(which gcc) \
-              -DCMAKE_CXX_COMPILER=$(which g++) \
-              -DCMAKE_INSTALL_PREFIX=/opt/conda/lib/python3.7/site-packages \
-              -DBUILD_HPMC=OFF \
-              -DBUILD_JIT=OFF \ 
-              -DBUILD_METAL=OFF \ 
-              -DBUILD_DEM=OFF \
-              -DBUILD_CGCMM=OFF \
-             -DBUILD_DEPRECATED=OFF \
-              -DBUILD_MPCD=OFF && \
-    make && \
-    make install
+RUN cp -r /opt/hoomd-tf/htf ./htf &&\
+    python install-prereq-headers.py -y --ignore-system && \
+    mkdir build
+
+WORKDIR /opt/hoomd-blue/build
+
+RUN cmake .. \
+        -DENABLE_MPI=OFF \
+        -DENABLE_GPU=ON \
+        -DPYTHON_EXECUTABLE=$(which python) \
+        -DCMAKE_C_COMPILER=$(which gcc) \
+        -DCMAKE_CXX_COMPILER=$(which g++) \
+        -DCMAKE_INSTALL_PREFIX=$(python -c "import site; print(site.getsitepackages()[0])") \
+        -DBUILD_HPMC=OFF \
+        -DBUILD_METAL=OFF \
+        -DBUILD_DEM=OFF \
+        -DBUILD_MPCD=OFF \
+        -DBUILD_MD=ON
+
+RUN make -j8 && \
+    make install && \
+    export PYTHONPATH="$PYTHONPAH:$(pwd)"
+
+# ensure build and linking succeeded
+RUN python -v -c "import hoomd; import hoomd.htf"
