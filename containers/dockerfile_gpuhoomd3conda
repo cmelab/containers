@@ -6,4 +6,8 @@ RUN conda update -n base -c defaults conda && \
     conda info && \
     conda install mamba -n base -c conda-forge && \
     mamba install -c conda-forge hoomd=3*=*gpu* cudatoolkit=10.2 python && \
-    mamba install -c conda-forge mbuild gsd cassandra jupyter foyer 
+    mamba install -c conda-forge mbuild gsd cassandra jupyter foyer && \
+    mamba install -c conda-forge freud forcefield-utilities signac && \
+    mamba install -c nglview mdanalysis && \
+    manba install -c bioconda gromacs  
+
