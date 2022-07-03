@@ -5,9 +5,5 @@ ENV CONDA_OVERRIDE_CUDA=10.2
 RUN conda update -n base -c defaults conda && \
     conda info && \
     conda install mamba -n base -c conda-forge && \
-    conda install -c conda-forge hoomd=3*=*gpu* cudatoolkit=10.2 python mbuild gsd foyer freud #&& \
-    #conda install -c conda-forge mbuild gsd cassandra jupyter foyer && \
-    #conda install -c conda-forge freud && \
-    #conda install -c bioconda gromacs &&\ 
-    #conda install -c conda-forge nglview mdanalysis
-
+    mamba install -c conda-forge hoomd=3*=*gpu* cudatoolkit=10.2 python && \
+    mamba install -c conda-forge mbuild gsd 
