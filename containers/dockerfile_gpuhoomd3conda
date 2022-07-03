@@ -8,4 +8,4 @@ RUN conda update -n base -c defaults conda && \
     mamba install -c conda-forge hoomd=3*=*gpu* cudatoolkit=10.2 python && \
     mamba install -c conda-forge mbuild gsd ipython ipykernel freud cassandra && \ 
     mamba install -c conda-forge mdanalysis nglview vim && \
-    conda install -c bioconda gromacs 
+    conda install -c bioconda gromacs=2020.4 matplotlib notebook numpy requests pandas seaborn mdtraj
