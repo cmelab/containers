@@ -7,5 +7,5 @@ RUN conda update -n base -c defaults conda && \
     conda install mamba -n base -c conda-forge && \
     mamba install -c conda-forge hoomd=3*=*gpu* cudatoolkit=10.2 python && \
     mamba install -c conda-forge mbuild gsd ipython ipykernel freud cassandra && \ 
-    mamba install -c conda-forge mdanalysis nglview vim && \
+    mamba install -c conda-forge mdanalysis nglview vim openssh && \
     conda install gromacs=*=mpi* -c bioconda -c conda-forge 
