@@ -1,0 +1,3 @@
+FROM cmelab/gpuhoomd3conda:latest
+
+    mamba install -c conda-forge freud nglview
