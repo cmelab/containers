@@ -1,3 +1,11 @@
-FROM cmelab/gpuhoomd3conda:latest
+FROM cmelab/gpuconda:latest
 
-    mamba install -c conda-forge freud nglview
+#ENV CONDA_OVERRIDE_CUDA=10.2
+
+RUN conda update -n base -c defaults conda && \
+    conda info && \
+    conda install mamba -n base -c conda-forge && \
+    mamba install -c conda-forge hoomd python && \
+    mamba install -c conda-forge mbuild gsd ipython ipykernel freud cassandra && \ 
+    mamba install -c conda-forge mdanalysis nglview vim && \
+    conda install -c bioconda gromacs 

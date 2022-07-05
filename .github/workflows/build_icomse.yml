@@ -1,0 +1,40 @@
+name: build_icomse
+
+on:
+  push:
+    branches: ['main']
+    # Run when container is changed
+    paths:
+        - 'containers/dockerfile_icomse'
+  # Allows workflow to be manually triggered
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: icomse
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2.0.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3.0.0
+        with:
+          context: .
+          file: ./containers/dockerfile_icomse
+          push: true
+          tags: ${{ env.REGISTRY }}/cmelab/${{ env.IMAGE_NAME }}:latest
