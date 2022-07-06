@@ -6,7 +6,7 @@ RUN conda update -n base -c defaults conda && \
     conda info && \
     conda install mamba -n base -c conda-forge && \
     mamba install -c conda-forge hoomd=3* cudatoolkit=10.2 python && \
-    mamba install -c conda-forge mbuild gsd ipython ipykernel mdanalysis ipywidgets widgetsnbextension freud cassandra && \ 
+    mamba install -c conda-forge mbuild gsd ipython ipykernel mdanalysis ipywidgets widgetsnbextension freud cassandra foyer && \ 
     mamba install -c conda-forge vim openssh && \
     conda install gromacs=*=mpi* -c bioconda -c conda-forge  && \ 
 #jupyter-nbextension enable nglview --py --sys-prefix
