@@ -15,4 +15,7 @@ RUN conda update -n base -c defaults conda && \
 RUN git clone https://github.com/cmelab/GIXStapose.git && \
     cd GIXStapose && \
     pip install .
-    
+
+# configure unprivileged user
+RUN useradd --create-home --shell /bin/bash icomse-software 
+USER icomse-software:icomse-software
