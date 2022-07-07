@@ -7,6 +7,11 @@ RUN conda update -n base -c defaults conda && \
     conda install mamba -n base -c conda-forge && \
     mamba install -c conda-forge hoomd=3*=*gpu* cudatoolkit=10.2 python && \
     mamba install -c conda-forge mbuild gsd ipython ipykernel mdanalysis foyer ipywidgets widgetsnbextension freud cassandra nglview py3Dmol ele mdtraj rdkit scipy networkx intermol numpy openbabel packmol parmed pip physical_validation && \ 
+    mamba install -c conda-forge fresnel openbabel pillow pyside2 rowan && \
     mamba install -c conda-forge vim openssh && \
     conda install gromacs=*=mpi* -c bioconda -c conda-forge  && \ 
     jupyter-nbextension enable nglview --py --sys-prefix
+
+RUN git clone https://github.com/cmelab/GIXStapose.git && \
+    cd GIXStapose && \
+    pip install .
