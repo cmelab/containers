@@ -10,7 +10,7 @@ RUN conda update -n base -c defaults conda && \
     mamba install -c conda-forge fresnel openbabel pillow pyside2 rowan && \ 
     mamba install -c conda-forge -c jaimergp/label/unsupported-cudatoolkit-shim cmeutils signac signac-flow && \
     mamba install -c conda-forge vim openssh && \
-    conda install gromacs=*=mpi* nglview -c bioconda -c conda-forge
+    conda install gromacs=*=mpi* nglview -c bioconda -c conda-forge &&\
     jupyter-nbextension enable nglview --py --sys-prefix
 
 RUN git clone https://github.com/cmelab/GIXStapose.git && \
