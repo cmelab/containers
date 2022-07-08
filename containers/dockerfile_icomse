@@ -6,12 +6,18 @@ RUN conda update -n base -c defaults conda && \
     conda info && \
     conda install mamba -n base -c conda-forge && \
     mamba install -c conda-forge hoomd python && \
-    mamba install -c conda-forge mbuild gsd ipython ipykernel mdanalysis foyer ipywidgets widgetsnbextension freud cassandra py3Dmol ele mdtraj rdkit scipy networkx intermol numpy packmol parmed pip physical_validation && \ 
+    mamba install -c conda-forge ipywidgets=7.5.1 jupyterlab=2.1.5 nodejs notebook && \ 
+    mamba install -c conda-forge mbuild gsd ipython ipykernel mdanalysis foyer ipywidgets widgetsnbextension nglview=2.7.7 freud cassandra py3Dmol ele mdtraj rdkit scipy networkx intermol numpy packmol parmed pip physical_validation && \ 
     mamba install -c conda-forge fresnel openbabel pillow pyside2 rowan && \ 
     mamba install -c conda-forge -c jaimergp/label/unsupported-cudatoolkit-shim cmeutils signac signac-flow && \
     mamba install -c conda-forge vim openssh && \
-    conda install gromacs=*=mpi* nglview -c bioconda -c conda-forge  
-#jupyter-nbextension enable nglview --py --sys-prefix
+    conda install gromacs=*=mpi* -c bioconda -c conda-forge  
+
+RUN git clone https://github.com/arose/nglview &&\
+    nglview install && nglview enable &&\
+    jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build &&\
+    jupyter labextension install nglview-js-widgets@2.7.7 &&\
+    jupyter-nbextension enable nglview --py --sys-prefix 
 
 RUN git clone https://github.com/cmelab/GIXStapose.git && \
     cd GIXStapose && \
