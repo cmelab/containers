@@ -8,6 +8,7 @@ RUN conda update -n base -c defaults conda && \
     mamba install -c conda-forge hoomd python && \
     mamba install -c conda-forge ipywidgets=7.5.1 jupyterlab=2.1.5 nodejs notebook && \ 
     mamba install -c conda-forge mbuild gsd ipython ipykernel mdanalysis foyer ipywidgets widgetsnbextension nglview=2.7.7 freud cassandra py3Dmol ele mdtraj rdkit scipy networkx intermol numpy packmol parmed pip physical_validation && \ 
+    mamba install -c conda-forge unyt constrainmol mosdef_cassandra && \ 
     mamba install -c conda-forge fresnel openbabel pillow pyside2 rowan && \ 
     mamba install -c conda-forge -c jaimergp/label/unsupported-cudatoolkit-shim cmeutils signac signac-flow && \
     mamba install -c conda-forge vim openssh && \
