@@ -29,7 +29,7 @@ RUN git clone https://github.com/cmelab/polybinder.git && \
     cd polybinder && \
     pip install .
 
-RUN git  clone git@github.com:maginngroup/mosdef_cassandra.git && \
+RUN git  clone http://github.com/maginngroup/mosdef_cassandra.git && \
     cd mosdef_cassandra && \
     pip install .
 
