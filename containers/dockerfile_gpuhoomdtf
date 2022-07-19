@@ -26,16 +26,17 @@ RUN git clone -b hoomd3-update --single-branch https://github.com/ur-whitelab/ho
 WORKDIR /opt/hoomd-blue
 
 # Install HOOMD with HOOMD-TF, make sure HTF is on submodule list
-RUN cp -r /opt/hoomd-tf/htf ./htf &&\
+RUN cp -r /opt/hoomd-tf/htf ./hoomd/htf &&\
     python install-prereq-headers.py -y --ignore-system && \
-    mkdir build
-# sed -ie "s/example_plugin;/example_plugin;htf;/g" CMakeLists.txt
+    mkdir build && \
+    sed -i -e "s/example_plugin;/example_plugin\" \"htf/g" ./CMakeLists.txt
 
 WORKDIR /opt/hoomd-blue/build
 
 RUN cmake .. \
         -DENABLE_MPI=OFF \
         -DENABLE_GPU=ON \
+	-DENABLE_HIP=ON \
         -DPYTHON_EXECUTABLE=$(which python) \
         -DCMAKE_C_COMPILER=$(which gcc) \
         -DCMAKE_CXX_COMPILER=$(which g++) \
@@ -46,7 +47,7 @@ RUN cmake .. \
         -DBUILD_MPCD=OFF \
         -DBUILD_MD=ON
 
-RUN make -j8 && \
+RUN make && \
     make install
 
 # ensure build and linking succeeded
