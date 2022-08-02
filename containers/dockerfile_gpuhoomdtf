@@ -33,6 +33,8 @@ RUN cp -r /opt/hoomd-tf/htf ./hoomd/htf &&\
 
 WORKDIR /opt/hoomd-blue/build
 
+RUN export CXXFLAGS=-isystem\ /opt/hoomd-blue/hoomd
+
 RUN cmake .. \
         -DENABLE_MPI=OFF \
         -DENABLE_GPU=ON \
@@ -51,4 +53,4 @@ RUN make && \
     make install
 
 # ensure build and linking succeeded
-RUN python -v -c "import hoomd; import hoomd.htf"
+#RUN python -v -c "import hoomd; import hoomd.htf"
