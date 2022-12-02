@@ -12,10 +12,12 @@ ENV PYTHONUSERBASE=/ignore/pythonpath
 
 WORKDIR /opt
 
-RUN conda install pybind11 eigen pytest-forked
+RUN conda config --add channels conda-forge
+
+RUN conda install pybind11 eigen pytest-forked networkx mdanalysis=1.1.1
 
 # Clone HOOMD
-ENV HOOMD_TAG=v3.0.0-beta.9
+ENV HOOMD_TAG=v3.7.0
 
 RUN git clone --recursive https://github.com/glotzerlab/hoomd-blue.git -b $HOOMD_TAG --single-branch
 
@@ -29,7 +31,7 @@ WORKDIR /opt/hoomd-blue
 RUN cp -r /opt/hoomd-tf/htf ./hoomd/htf &&\
     python install-prereq-headers.py -y --ignore-system && \
     mkdir build && \
-    sed -i -e "s/example_plugin;/example_plugin\" \"htf/g" ./CMakeLists.txt
+    sed -i -e "s/PLUGINS \"/PLUGINS \"htf;/g" ./CMakeLists.txt
 
 WORKDIR /opt/hoomd-blue/build
 
