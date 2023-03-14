@@ -14,24 +14,24 @@ RUN conda update -n base -c defaults conda && \
     mamba install -c conda-forge vim openssh && \
     conda install gromacs=*=mpi* -c bioconda -c conda-forge  
 
-RUN git clone https://github.com/arose/nglview &&\
-    nglview install && nglview enable &&\
-    jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build &&\
-    jupyter labextension install nglview-js-widgets@2.7.7 &&\
-    jupyter-nbextension enable nglview --py --sys-prefix 
+#RUN git clone https://github.com/arose/nglview &&\
+#    nglview install && nglview enable &&\
+#    jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build &&\
+#    jupyter labextension install nglview-js-widgets@2.7.7 &&\
+#    jupyter-nbextension enable nglview --py --sys-prefix 
 
 RUN git clone https://github.com/cmelab/GIXStapose.git && \
     cd GIXStapose && \
     pip install . && \ 
     cd 
 
-RUN git clone https://github.com/cmelab/polybinder.git && \
-    cd polybinder && \
-    pip install .
+#RUN git clone https://github.com/cmelab/polybinder.git && \
+#    cd polybinder && \
+#    pip install .
 
-RUN git  clone http://github.com/maginngroup/mosdef_cassandra.git && \
-    cd mosdef_cassandra && \
-    pip install .
+#RUN git  clone http://github.com/maginngroup/mosdef_cassandra.git && \
+#    cd mosdef_cassandra && \
+#    pip install .
 
 
 # configure unprivileged user
