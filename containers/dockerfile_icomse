@@ -12,7 +12,8 @@ RUN conda update -n base -c defaults conda && \
     mamba install -c conda-forge fresnel openbabel pillow pyside2 rowan && \ 
     mamba install -c conda-forge -c jaimergp/label/unsupported-cudatoolkit-shim cmeutils signac signac-flow && \
     mamba install -c conda-forge vim openssh && \
-    conda install gromacs=*=mpi* -c bioconda -c conda-forge  
+    mamba install --strict-channel-priority -c plumed/label/masterclass-2022 -c conda-forge plumed gromacs
+#conda install gromacs=*=mpi* -c bioconda -c conda-forge  
 
 #RUN git clone https://github.com/arose/nglview &&\
 #    nglview install && nglview enable &&\
