@@ -9,8 +9,8 @@ RUN conda update -n base -c defaults conda && \
     mamba install -c conda-forge fresnel openbabel pillow pyside2 rowan && \ 
     mamba install -c conda-forge cmeutils signac signac-flow && \
     mamba install -c conda-forge vim openssh && \
-    mamba install --strict-channel-priority -c plumed/label/masterclass-2022 -c conda-forge plumed gromacs
-    mamba install -c conda-forge "pymbar>=4.0" "alchemlyb=2.0" && \ 
+    mamba install --strict-channel-priority -c plumed/label/masterclass-2022 -c conda-forge plumed gromacs && \
+    mamba install -c conda-forge "pymbar>=4.0" "alchemlyb=2.0" 
 
 # configure unprivileged user
 RUN useradd --create-home --shell /bin/bash icomse-software 
