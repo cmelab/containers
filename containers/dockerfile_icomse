@@ -4,11 +4,10 @@ RUN conda update -n base -c defaults conda && \
     conda info && \
     conda install mamba -n base -c conda-forge && \
     mamba install -c conda-forge "python=3.8" && \
-    mamba install --strict-channel-priority -c plumed/label/masterclass-2022 -c conda-forge plumed gromacs  &&\
     mamba install -c conda-forge mbuild gsd ipython ipykernel mdanalysis foyer ipywidgets widgetsnbextension freud cassandra py3Dmol ele mdtraj rdkit scipy networkx intermol numpy packmol parmed pip physical_validation dask matplotlib jupyter seaborn && \ 
     mamba install -c conda-forge unyt constrainmol black sphinx sphinx_rtd_theme pytest pandas garnett pycifrw && \ 
     mamba install -c conda-forge vim openssh && \
-    mamba install -c conda-forge "pymbar>=4.0" "alchemlyb=2.0" 
+    mamba install --strict-channel-priority -c plumed/label/masterclass-2022 -c conda-forge plumed gromacs py-plumed "pymbar>=4.0" "alchemlyb=2.0"
 
 # configure unprivileged user
 RUN useradd --create-home --shell /bin/bash icomse-software 
