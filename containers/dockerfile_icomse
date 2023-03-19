@@ -1,19 +1,16 @@
 FROM cmelab/gpuconda:latest
 
-#ENV CONDA_OVERRIDE_CUDA=10.2
-
 RUN conda update -n base -c defaults conda && \
     conda info && \
     conda install mamba -n base -c conda-forge && \
-    mamba install -c conda-forge hoomd python && \
-    mamba install -c conda-forge ipywidgets=7.5.1 jupyterlab=2.1.5 nodejs notebook && \ 
-    mamba install -c conda-forge mbuild gsd ipython ipykernel mdanalysis foyer ipywidgets widgetsnbextension freud cassandra py3Dmol ele mdtraj rdkit scipy networkx intermol numpy packmol parmed pip physical_validation dask matplotlib jupyter seaborn plumed py-plumed pymbar alchemlyb && \ 
+    mamba install -c conda-forge python && \
+    mamba install -c conda-forge "pymbar>=4.0" "alchemlyb=2.0" && \ 
+    mamba install -c conda-forge mbuild gsd ipython ipykernel mdanalysis foyer ipywidgets widgetsnbextension freud cassandra py3Dmol ele mdtraj rdkit scipy networkx intermol numpy packmol parmed pip physical_validation dask matplotlib jupyter seaborn plumed py-plumed && \ 
     mamba install -c conda-forge unyt constrainmol black sphinx sphinx_rtd_theme pytest pandas garnett pycifrw && \ 
     mamba install -c conda-forge fresnel openbabel pillow pyside2 rowan && \ 
     mamba install -c conda-forge cmeutils signac signac-flow && \
     mamba install -c conda-forge vim openssh && \
     mamba install --strict-channel-priority -c plumed/label/masterclass-2022 -c conda-forge plumed gromacs
-#conda install gromacs=*=mpi* -c bioconda -c conda-forge  
 
 # configure unprivileged user
 RUN useradd --create-home --shell /bin/bash icomse-software 
