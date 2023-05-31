@@ -1,8 +1,4 @@
-FROM cmelab/gputensorflow:latest
-
-# Make RUN commands use `bash --login`: -- fixes conda init
-# https://pythonspeed.com/articles/activate-conda-dockerfile/
-SHELL ["/bin/bash", "--login", "-c"]
+FROM nvcr.io/nvidia/l4t-ml:r35.2.1-py3
 
 # Prevent python from loading packages from outside the container
 # default empty pythonpath
@@ -10,16 +6,19 @@ ENV PYTHONPATH=/ignore/pythonpath
 
 ENV PYTHONUSERBASE=/ignore/pythonpath
 
+ENV HOOMD_TAG=v3.11.0
+
 WORKDIR /opt
 
-RUN conda config --add channels conda-forge
-
-RUN conda install pybind11 eigen pytest-forked networkx mdanalysis=1.1.1
-
-# Clone HOOMD
-ENV HOOMD_TAG=v3.7.0
-
+# clone HOOMD
 RUN git clone --recursive https://github.com/glotzerlab/hoomd-blue.git -b $HOOMD_TAG --single-branch
+
+# Pull a command line arg to trigger rebuilds at this cache step
+# Don't need to re-clone HOOMD-blue but DO want to re-build HOOMD-TF changes
+# c/o: https://stackoverflow.com/questions/35154219/rebuild-docker-image-from-specific-step
+# Easiest way is to use a timestamp: docker build --build-arg BUILD_DATE=$(date +%Y%m%d-%H%M%S)
+
+ARG BUILD_DATE=undefined
 
 # Link HOOMD-TF in HOOMD/hoomd modules
 RUN git clone -b hoomd3-update --single-branch https://github.com/ur-whitelab/hoomd-tf.git
@@ -29,22 +28,22 @@ WORKDIR /opt/hoomd-blue
 
 # Install HOOMD with HOOMD-TF, make sure HTF is on submodule list
 RUN cp -r /opt/hoomd-tf/htf ./hoomd/htf &&\
-    python install-prereq-headers.py -y --ignore-system && \
+    python3 install-prereq-headers.py -y && \
     mkdir build && \
     sed -i -e "s/PLUGINS \"/PLUGINS \"htf;/g" ./CMakeLists.txt
 
 WORKDIR /opt/hoomd-blue/build
 
-RUN export CXXFLAGS=-isystem\ /opt/hoomd-blue/hoomd
-
-RUN cmake .. \
+RUN export CXXFLAGS=-isystem\ /opt/hoomd-blue/hoomd &&\
+    cmake .. \
         -DENABLE_MPI=OFF \
         -DENABLE_GPU=ON \
-	-DENABLE_HIP=ON \
-        -DPYTHON_EXECUTABLE=$(which python) \
+	    -DENABLE_HIP=ON \
+        -DPYTHON_EXECUTABLE=$(which python3) \
         -DCMAKE_C_COMPILER=$(which gcc) \
         -DCMAKE_CXX_COMPILER=$(which g++) \
-        -DCMAKE_INSTALL_PREFIX=$(python -c "import site; print(site.getsitepackages()[0])") \
+        -Dpybind11_DIR=/usr/local/lib/python3.8/dist-packages/pybind11/share/cmake/pybind11/ \
+        -DCMAKE_INSTALL_PREFIX="$(python3 -c "import site; print(site.getsitepackages()[0])")" \
         -DBUILD_HPMC=OFF \
         -DBUILD_METAL=OFF \
         -DBUILD_DEM=OFF \
