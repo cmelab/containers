@@ -3,7 +3,7 @@ FROM cmelab/gpuconda:latest
 RUN conda update -n base -c defaults conda && \
     conda info && \
     conda install mamba -n base -c conda-forge && \
-    mamba install -c bioconda -c conda-forge python=3.8 gromacs plumed py-plumed "pymbar>=4.0" "alchemlyb=2.0" vim openssh mbuild gsd ipython ipykernel mdanalysis foyer ipywidgets widgetsnbextension freud py3Dmol ele mdtraj rdkit scipy networkx intermol numpy packmol parmed pip physical_validation dask matplotlib jupyter seaborn unyt constrainmol black sphinx sphinx_rtd_theme pytest pandas garnett pycifrw 
+    mamba install -c bioconda -c conda-forge python=3.8 gromacs plumed py-plumed "pymbar>=4.0" "alchemlyb=2.0" vim openssh mbuild gsd ipython ipykernel mdanalysis foyer ipywidgets widgetsnbextension freud py3Dmol ele mdtraj rdkit scipy networkx intermol numpy packmol parmed pip physical_validation dask matplotlib jupyter seaborn unyt constrainmol black sphinx sphinx_rtd_theme pytest pandas garnett pycifrw ase qe
 
 # configure unprivileged user
 RUN useradd --create-home --shell /bin/bash icomse-software 
