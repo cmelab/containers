@@ -3,7 +3,20 @@ FROM cmelab/gpuconda:latest
 RUN conda update -n base -c defaults conda && \
     conda info && \
     conda install mamba -n base -c conda-forge && \
-    conda install -c conda-forge python=3.8 vim openssh mbuild gsd ipython ipykernel mdanalysis foyer ipywidgets widgetsnbextension freud py3Dmol ele mdtraj rdkit scipy networkx intermol numpy packmol parmed pip physical_validation dask matplotlib jupyter seaborn unyt constrainmol pytest pandas garnett pycifrw ase 
+    conda install -c conda-forge python=3.8 vim openssh mbuild gsd ipython ipykernel mdanalysis foyer ipywidgets widgetsnbextension freud py3Dmol ele mdtraj rdkit scipy networkx intermol numpy packmol parmed pip physical_validation dask matplotlib jupyter seaborn unyt constrainmol pytest pandas garnett pycifrw ase nglview 
+
+# install QE with Environ
+
+
+RUN wget --quiet https://github.com/QEF/q-e/archive/refs/tags/qe-7.0.tar.gz \
+   && tar -xf qe-7.0.tar.gz \
+   && cd /q-e-qe-7.0 \
+   && ./configure \
+   && make all \
+   && make install \
+   && cd / \
+   && rm -rf q-e-qe-7.0/
+
 
 # configure unprivileged user
 RUN useradd --create-home --shell /bin/bash icomse-software 
