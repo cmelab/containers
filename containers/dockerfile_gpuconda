@@ -12,7 +12,7 @@ RUN apt-get update && \
         git \
         libtbb-dev \
         libgl1-mesa-dev \
-    && apt-get clean
+	&& apt-get clean
 
 # Install miniconda
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
@@ -22,8 +22,8 @@ ENV PATH /opt/conda/bin:$PATH
 # By default running container starts bash shell
 CMD [ "/bin/bash" ]
 
-ENV CONDA_VERSION=py38_4.9.2
-ENV CONDA_MD5=122c8c9beb51e124ab32a0fa6426c656
+ENV CONDA_VERSION=py310_23.3.1-0
+ENV CONDA_MD5=5abc78b664b7da9d14ade330534cc98283bb838c6b10ad9cfd8b9cc4153f8104
 
 RUN curl -s https://repo.anaconda.com/miniconda/Miniconda3-${CONDA_VERSION}-Linux-x86_64.sh -o miniconda.sh && \
     echo "${CONDA_MD5}  miniconda.sh" > miniconda.md5 && \
