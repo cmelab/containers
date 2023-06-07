@@ -1,17 +1,8 @@
-FROM nvidia/cuda:10.2-devel 
+FROM cmelab/gpuconda:latest
 
 # Install system dependencies
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        ca-certificates \
-        cmake \
-        curl \
-        git \
-        libtbb-dev \
-    && apt-get clean
 
 # Install miniconda
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
@@ -20,22 +11,6 @@ ENV PATH /opt/conda/bin:$PATH
 
 # By default running container starts bash shell
 CMD [ "/bin/bash" ]
-
-ENV CONDA_VERSION=py38_4.9.2
-ENV CONDA_MD5=122c8c9beb51e124ab32a0fa6426c656
-
-RUN curl -s https://repo.anaconda.com/miniconda/Miniconda3-${CONDA_VERSION}-Linux-x86_64.sh -o miniconda.sh && \
-    echo "${CONDA_MD5}  miniconda.sh" > miniconda.md5 && \
-    if ! md5sum --status -c miniconda.md5; then exit 1; fi && \
-    mkdir -p /opt && \
-    sh miniconda.sh -b -p /opt/conda && \
-    rm miniconda.sh miniconda.md5 && \
-    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
-    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
-    echo "conda activate base" >> ~/.bashrc && \
-    find /opt/conda/ -follow -type f -name '*.a' -delete && \
-    find /opt/conda/ -follow -type f -name '*.js.map' -delete && \
-    /opt/conda/bin/conda clean -afy
 
 WORKDIR /opt
 
@@ -50,7 +25,7 @@ ENV PYTHONPATH=/ignore/pythonpath
 ENV PYTHONUSERBASE=/ignore/pythonpath
 
 # Install HOOMD deps
-RUN conda install -c conda-forge numpy python=3.7 && \
+RUN conda install -c conda-forge numpy python=$(python --version|awk '{print $2}') && \
     python --version
 
 # Install HOOMD
@@ -64,10 +39,10 @@ RUN git clone --recursive https://github.com/glotzerlab/hoomd-blue.git && \
     cd build && \
     cmake ../ -DENABLE_MPI=OFF \
               -DENABLE_CUDA=ON \
-              -DPYTHON_EXECUTABLE=/opt/conda/bin/python3.7 \
+              -DPYTHON_EXECUTABLE=$(which python) \
               -DCMAKE_C_COMPILER=$(which gcc) \
               -DCMAKE_CXX_COMPILER=$(which g++) \
-              -DCMAKE_INSTALL_PREFIX=/opt/conda/lib/python3.7/site-packages \
+              -DCMAKE_INSTALL_PREFIX=$(python -c "import site; print(site.USER_SITE)") \
               -DBUILD_HPMC=OFF \
               -DBUILD_JIT=OFF \ 
               -DBUILD_METAL=OFF \ 
@@ -75,6 +50,6 @@ RUN git clone --recursive https://github.com/glotzerlab/hoomd-blue.git && \
               -DBUILD_CGCMM=OFF \
               -DBUILD_MPCD=OFF \
               -DSINGLE_PRECISION=ON && \
-    make && \
+    make -j8 && \
     make install
 
