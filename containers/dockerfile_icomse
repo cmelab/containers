@@ -5,7 +5,21 @@ RUN conda update -n base -c defaults conda && \
     conda install mamba -n base -c conda-forge && \
     conda install -c conda-forge python=3.8 vim openssh mbuild gsd ipython ipykernel mdanalysis foyer ipywidgets scipy numpy physical_validation matplotlib jupyter pandas pycifrw ase nglview 
 
+
 # install QE with Environ
+RUN git clone git@github.com:environ-developers/Environ.git \
+    && cd Environ \
+    && ENVIRON_DIR=$(pwd)
+
+RUN wget --quiet https://www.quantum-espresso.org/rdm-download/488/v7-2/86305b33ed27b36ec920cb0e18a64b1b/qe-7.2-ReleasePack.tar.gz \
+    && tar -xf qe-7.2-ReleasePack.tar.gz
+
+# for skipping to here in cache
+# use --build-arg BUILD_DATE=$(date +%s) for unique time when doing docker build
+ARG BUILD_DATE=unknown
+
+RUN cd qe-7.2-ReleasePack \
+    && ./configure --with-environ=$ENVIRON_DIR
 #RUN wget --quiet https://github.com/QEF/q-e/archive/refs/tags/qe-7.0.tar.gz \
 #   && tar -xf qe-7.0.tar.gz \
 #   && cd /q-e-qe-7.0 \
