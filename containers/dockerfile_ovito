@@ -1,0 +1,42 @@
+from ubuntu:18.04
+
+# Install system dependencies
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Etc/UTC
+
+# install build reqs from https://gitlab.com/stuko/ovito/-/blob/v3.0.0/doc/manual/development/build_linux.docbook
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        cmake \
+        curl \
+        build-essential \
+        git \
+        cmake-curses-gui \
+        qt5-default \
+        libqt5svg5-dev \
+        libboost-dev \
+        libavcodec-dev \
+        libavdevice-dev \
+        libavfilter-dev \
+        libavformat-dev \
+        libavresample-dev \
+        libavutil-dev \
+        libswscale-dev \
+        libnetcdf-dev \
+        libhdf5-dev \
+        libhdf5-serial-dev \
+        libssh-dev \
+        xsltproc \
+        docbook-xml \
+    && apt-get clean
+
+# get frozen version before "Pro" ovito
+RUN git clone --single-branch -b v3.0.0 https://gitlab.com/stuko/ovito.git && \
+    mkdir ovito/build
+
+WORKDIR ovito/build
+
+RUN cmake .. -DCMAKE_BUILD_TYPE=Release
+
+RUN make -j4 
