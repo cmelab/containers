@@ -1,5 +1,10 @@
 from ubuntu:18.04
 
+# NOTE: *before* you run this container you will need to expose your host's X server, e.g.:
+# sudo xhost +local:root
+# when you run it, mount your X11 Unix directory, set DISPLAY, turn off qt's shared memory extension:
+# docker run --rm -it --gpus all -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=$DISPLAY -e QT_X11_NO_MITSHM=1
+
 # Install system dependencies
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
@@ -22,6 +27,15 @@ RUN apt-get update && \
         libavformat-dev \
         libavresample-dev \
         libavutil-dev \
+        libglvnd0 \
+        libgl1 \
+        libglx0 \
+        libegl1 \
+        libglvnd-dev \
+        libgl1-mesa-dev \
+        libegl1-mesa-dev \
+        libxext6 \
+        libx11-6 \
         libswscale-dev \
         libnetcdf-dev \
         libhdf5-dev \
@@ -30,6 +44,9 @@ RUN apt-get update && \
         xsltproc \
         docbook-xml \
     && apt-get clean
+
+ENV NVIDIA_VISIBLE_DEVICES all
+ENV NVIDIA_DRIVER_CAPABILITIES all
 
 # get frozen version before "Pro" ovito
 RUN git clone --single-branch -b v3.0.0 https://gitlab.com/stuko/ovito.git && \
