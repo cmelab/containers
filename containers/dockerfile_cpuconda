@@ -1,6 +1,5 @@
-FROM nvidia/cuda:11.7.1-cudnn8-devel-ubuntu18.04
+FROM library/ubuntu:18.04
 
-# Install system dependencies
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
 
@@ -12,7 +11,7 @@ RUN apt-get update && \
         git \
         libtbb-dev \
         libgl1-mesa-dev \
-	&& apt-get clean
+        && apt-get clean
 
 # Install miniconda
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
@@ -49,4 +48,3 @@ SHELL ["/bin/bash", "--login", "-c"]
 ENV PYTHONPATH=/ignore/pythonpath
 
 ENV PYTHONUSERBASE=/ignore/pythonpath
-
