@@ -5,4 +5,4 @@ ENV CONDA_OVERRIDE_CUDA=11.7
 RUN conda update -n base -c defaults conda && \
     conda info && \
     conda install libarchive mamba -n base -c conda-forge && \
-    mamba install -c conda-forge hoomd=3*=*gpu* cudatoolkit=11.7 python && \
+    mamba install -c conda-forge hoomd=4*=*gpu* cudatoolkit=11.7 python && \
