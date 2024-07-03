@@ -1,5 +1,5 @@
 FROM glotzerlab/software
 
 # configure unprivileged user
-RUN useradd --create-home --shell /bin/bash icomse-software 
+RUN useradd --create-home --shell /bin/sh icomse-software 
 USER icomse-software:icomse-software
