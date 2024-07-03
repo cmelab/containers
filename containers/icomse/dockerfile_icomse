@@ -1,11 +1,10 @@
 FROM cmelab/gpuconda:latest
 
-#ENV CONDA_OVERRIDE_CUDA=11.7
-
 RUN conda update -n base -c defaults conda && \
     conda info && \
-    #conda install libarchive mamba -n base -c conda-forge && \
-    conda install -c conda-forge hoomd=4*=*gpu* cudatoolkit=11.7 python && \
+    conda install libarchive mamba -n base -c conda-forge && \
+    mamba install -c conda-forge hoomd=4.7.0
+
 #RUN conda update -n base -c defaults conda && \
 #    conda info && \
 #    conda install mamba -n base -c conda-forge && \
