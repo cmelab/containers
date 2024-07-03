@@ -1,20 +1,15 @@
 FROM cmelab/gpuconda:latest
 
+ENV CONDA_OVERRIDE_CUDA=11.7
+
+RUN conda update -n base -c defaults conda && \
+    conda info && \
+    conda install libarchive mamba -n base -c conda-forge && \
+    mamba install -c conda-forge hoomd=4*=*gpu* cudatoolkit=11.7 python && \
 RUN conda update -n base -c defaults conda && \
     conda info && \
     conda install mamba -n base -c conda-forge && \
     conda install -c conda-forge python=3.8 vim openssh mbuild gsd ipython ipykernel mdanalysis foyer ipywidgets scipy numpy physical_validation matplotlib jupyter pandas pycifrw ase nglview 
-
-# install QE with Environ
-#RUN wget --quiet https://github.com/QEF/q-e/archive/refs/tags/qe-7.0.tar.gz \
-#   && tar -xf qe-7.0.tar.gz \
-#   && cd /q-e-qe-7.0 \
-#   && ./configure \
-#   && make all \
-#   && make install \
-#   && cd / \
-#   && rm -rf q-e-qe-7.0/
-
 
 # configure unprivileged user
 RUN useradd --create-home --shell /bin/bash icomse-software 
