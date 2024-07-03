@@ -36,6 +36,6 @@ jobs:
         uses: docker/build-push-action@v3.0.0
         with:
           context: .
-          file: ./containers/dockerfile_icomse
+          file: ./containers/icomse/dockerfile_icomse
           push: true
           tags: ${{ env.REGISTRY }}/cmelab/${{ env.IMAGE_NAME }}:latest
