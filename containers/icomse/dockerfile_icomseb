@@ -1,5 +1,5 @@
 FROM glotzerlab/software
 
-# configure unprivileged user
-RUN useradd --create-home --shell /bin/sh icomse-software 
-USER icomse-software:icomse-software
+RUN mamba install -c conda-forge vim openssh mbuild gsd ipython ipykernel mdanalysis foyer ipywidgets scipy numpy physical_validation matplotlib jupyter pandas pycifrw ase nglview 
+
+
