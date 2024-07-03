@@ -5,7 +5,7 @@ on:
     branches: ['main']
     # Run when container is changed
     paths:
-        - 'containers/dockerfile_icomse'
+        - 'containers/icomse/dockerfile_icomse'
   # Allows workflow to be manually triggered
   workflow_dispatch:
 
