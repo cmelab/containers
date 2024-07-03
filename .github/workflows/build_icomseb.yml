@@ -1,17 +1,17 @@
-name: build_icomseB
+name: build_icomseb
 
 on:
   push:
     branches: ['main']
     # Run when container is changed
     paths:
-        - 'containers/icomse/dockerfile_icomseB'
+        - 'containers/icomse/dockerfile_icomseb'
   # Allows workflow to be manually triggered
   workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: icomseB
+  IMAGE_NAME: icomseb
 
 jobs:
   build-and-push-image:
@@ -36,6 +36,6 @@ jobs:
         uses: docker/build-push-action@v3.0.0
         with:
           context: .
-          file: ./containers/icomse/dockerfile_icomseB
+          file: ./containers/icomse/dockerfile_icomseb
           push: true
           tags: ${{ env.REGISTRY }}/cmelab/${{ env.IMAGE_NAME }}:latest
