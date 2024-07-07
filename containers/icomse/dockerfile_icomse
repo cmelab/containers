@@ -5,7 +5,7 @@ ENV CONDA_OVERRIDE_CUDA="12.0"
 RUN conda update -n base -c defaults conda && \
     conda info && \
     conda install libarchive mamba -n base -c conda-forge && \
-    mamba install -c conda-forge "hoomd=4.7.0=*gpu*" "cuda-version=12.0"  vim openssh mbuild gsd ipython ipykernel mdanalysis foyer freud ipywidgets scipy numpy physical_validation matplotlib jupyter pandas flowermd nglview mdanalysis 
+    mamba install -c conda-forge "hoomd=4.7.0=*gpu*" "cuda-version=12.0"  vim openssh mbuild gsd ipython ipykernel mdanalysis foyer freud ipywidgets scipy numpy physical_validation matplotlib jupyter pandas flowermd nglview mdanalysis ovito
 
 # configure unprivileged user
 RUN useradd --create-home --shell /bin/bash icomse-software 
